@@ -168,9 +168,9 @@ expecting a different answer.
 | | |
 |---|---|
 | Books in the library | 15 PDFs + 2 text conversions |
-| Extraction modules | 4 — `lbr-scalp-setups`, `trading-in-the-zone`, `25-rules-of-trading-discipline`, `money-management-landry` |
-| Source concepts | 29 |
-| Hypotheses registered | 13 — 8 open, 3 settled, 2 unfalsifiable |
+| Extraction modules | 5 — `lbr-scalp-setups`, `trading-in-the-zone`, `25-rules-of-trading-discipline`, `money-management-landry`, `technical-market-indicators` |
+| Source concepts | 32 |
+| Hypotheses registered | 14 — 9 open, 3 settled, 2 unfalsifiable |
 | Validations | 7 |
 | Tests | 39 |
 

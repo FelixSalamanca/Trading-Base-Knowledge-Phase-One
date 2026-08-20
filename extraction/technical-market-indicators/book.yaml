@@ -1,0 +1,48 @@
+slug: technical-market-indicators
+title: "The E-Book of Technical Market Indicators, v1.1"
+author: "Wall Street Courier (Rudolph Koch)"
+year: 2002
+publication: "wallstreetcourier.com"
+source_file: sources/indicators/The E-Book of Technical Market Indicators.pdf
+source_sha256: 905c279321a9e5481a4a42e876b73951bd05c528dc6c8643a2ac3e2cbc5420f1
+pages: 49
+categories:
+  - technical_analysis
+  - strategy_concepts
+extraction_status: complete
+
+notes: >
+  Priority book #4, and the extraction is unusual: the most valuable thing this
+  source produced is a negative result.
+
+  Twenty-nine indicators are catalogued and **none of them can exist in spot
+  forex**. The book is entirely about US equity market internals -- data that
+  exists because the NYSE is a centralised exchange that publishes its own
+  plumbing:
+
+    Advance-Decline Line and Ratio - Upside/Downside Volume - High-Low
+    Differential - Large Block Index - ARMS/TRIN - CBOE VIX - Index Options
+    Put/Call Ratio - Smart Money Flow Index - Program Trading - Calendar
+    Spread - Odd-Lot Differential - Short Sales Statistics
+
+  Spot forex has no exchange, no consolidated tape, no advance/decline because
+  there is no universe of listed issues to advance or decline, no published
+  short interest, and no options chain in MT5. Not one indicator in this book
+  can be computed for EURUSD.
+
+  That is worth recording precisely rather than filing the book as irrelevant.
+  A catalogue of impressive-sounding indicators is exactly the sort of thing
+  that gets half-adopted later -- someone reads "TRIN below 0.8 signals
+  strength", finds a TRIN-like formula, and applies it to a currency pair where
+  the inputs mean nothing. Naming the structural reason it cannot transfer is
+  the useful output.
+
+  Two things do transfer, and only two:
+
+  1. The preface's argument about indicator contradiction and the discipline of
+     choosing a few and staying with them.
+  2. The *category* of positioning and sentiment data, whose only genuine forex
+     analogue is CFTC Commitments of Traders on currency futures -- weekly,
+     lagged, and not available inside MT5.
+
+  Both are extracted below. Nothing else in 49 pages applies to this project.

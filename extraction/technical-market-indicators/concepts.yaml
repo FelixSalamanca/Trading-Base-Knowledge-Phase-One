@@ -1,0 +1,145 @@
+# SOURCE KNOWLEDGE -- Wall Street Courier's indicator catalogue.
+#
+# Three concepts from 49 pages, and that ratio is the finding. The book's
+# twenty-nine indicators are all US equity market internals and none can be
+# computed for a currency pair. Recording why is more useful than recording
+# what each one does.
+
+- id: wsc-market-internals-require-a-central-exchange
+  category: technical_analysis
+  claim: >
+    Market breadth and sentiment indicators -- advance-decline lines, upside
+    and downside volume, high-low differentials, ARMS/TRIN, VIX, index options
+    put/call ratios, large block transactions, program trading, odd-lot
+    statistics and short interest -- reveal the prevailing sentiment beneath a
+    market's price.
+  source:
+    book: "The E-Book of Technical Market Indicators"
+    author: "Wall Street Courier"
+    year: 2002
+    chapter: "Preface and full catalogue"
+    page: "1-49"
+  rationale: >
+    "The transparency of the American markets offers an array of indicators and
+    allows deep insights of prevailing sentiment." Every indicator in the book
+    is derived from data the NYSE and CBOE publish about their own activity.
+  conditions:
+    - "A centralised exchange that publishes participation data"
+    - "A universe of listed issues whose advances and declines can be counted"
+    - "A published options chain and short interest"
+  assumptions:
+    - "The instrument trades on an exchange with a consolidated tape"
+  invalidated_by:
+    - "Any market lacking a central exchange -- the inputs do not exist to compute"
+  mechanics:
+    - "advance-decline line"
+    - "upside-downside volume"
+    - "ARMS/TRIN"
+    - "VIX"
+    - "put/call ratio"
+    - "short interest"
+    - "odd-lot statistics"
+  evidence_quality: none
+  author_claimed_result: >
+    Definitions and interpretations, no measured performance for any indicator.
+  stance: unrelated
+  felix_inputs: []
+  felix_current_behaviour: >
+    Not applicable, and not for want of implementation. Spot forex is a
+    decentralised OTC market: there is no exchange, no consolidated tape, no
+    universe of issues to advance or decline, no published short interest, and
+    no options chain in MT5. None of these indicators can be computed for
+    EURUSD at any level of effort.
+  notes: >
+    The most useful entry in this extraction, and it is a warning rather than a
+    technique. These indicators are well known and sound authoritative, which
+    makes them exactly the kind of thing that gets half-ported later: someone
+    finds a "TRIN-like" formula, applies it to a currency pair, and produces a
+    number whose inputs mean nothing. The barrier is structural, not technical.
+    Recorded so the question is closed rather than rediscovered.
+
+- id: wsc-positioning-data-as-sentiment
+  category: strategy_concepts
+  claim: >
+    What market participants are actually positioned in -- as distinct from
+    what price is doing -- carries information, particularly at extremes where
+    crowded positioning tends to precede reversal.
+  source:
+    book: "The E-Book of Technical Market Indicators"
+    author: "Wall Street Courier"
+    year: 2002
+    chapter: "Smart Money Flow Index, Short Sales Statistics"
+    page: "27-45"
+  rationale: >
+    Specialists, floor traders and institutions leave traces in published data
+    that ordinary price charts do not show.
+  conditions:
+    - "Positioning data must be published and reasonably current"
+  assumptions:
+    - "Published positioning reflects real exposure rather than hedges"
+    - "The data arrives in time to act on"
+  invalidated_by:
+    - "Positioning data too lagged to act on before the move it describes"
+  mechanics:
+    - "positioning"
+    - "sentiment extremes"
+    - "contrarian signal"
+  evidence_quality: none
+  author_claimed_result: "None offered."
+  stance: unrelated
+  felix_inputs: []
+  felix_current_behaviour: >
+    FelixScalper uses no positioning or sentiment input of any kind.
+  notes: >
+    The only category in the book with a genuine forex analogue: CFTC
+    Commitments of Traders on currency futures. But COT is published weekly
+    with a three-day lag, which is roughly 2,000 M5 bars -- so even if the
+    signal were real it could not reach a five-minute decision. Recorded as a
+    concept with a stated timing barrier rather than as a candidate, and no
+    hypothesis is registered because there is no measurement our journal could
+    make.
+
+- id: wsc-choose-few-indicators-and-keep-them
+  category: strategy_concepts
+  claim: >
+    Indicators contradict each other most of the time and there is no holy
+    grail. No indicator is right all the time and you do not need to be. Choose
+    some reliable indicators and stick to them; do not follow one set for a
+    while and switch when they fail.
+  source:
+    book: "The E-Book of Technical Market Indicators"
+    author: "Wall Street Courier"
+    year: 2002
+    chapter: "Preface"
+    page: "1"
+  rationale: >
+    Switching after failure guarantees the trader is always using whatever most
+    recently disappointed them, and no set is ever given long enough to show
+    what it does.
+  conditions: []
+  assumptions:
+    - "The chosen set has an edge in the first place"
+  invalidated_by:
+    - "Not specified"
+  mechanics:
+    - "indicator selection"
+    - "methodological consistency"
+  evidence_quality: none
+  author_claimed_result: "None offered."
+  stance: agrees
+  felix_inputs: []
+  felix_current_behaviour: >
+    Nine weighted components, fixed, and frozen for the duration of the forward
+    test so the sample measures one unchanged system.
+  notes: >
+    The third independent source to make this argument, after Zalesky's Rule 5
+    and Douglas's chapter 11. Three practitioners from different markets and
+    decades converging on "pick a method and leave it alone" is the strongest
+    consensus in the library so far -- though all three are single-practitioner
+    accounts with no measurement behind them, and the same survivorship problem
+    applies to each.
+
+    Worth pairing with a result we already hold: the twenty-trade test showed a
+    single small window contradicts the full sample 55% of the time. Switching
+    method after a bad run is not merely undisciplined; at realistic sample
+    sizes the bad run carries almost no information about the method.
