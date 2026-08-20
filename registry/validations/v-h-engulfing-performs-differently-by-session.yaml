@@ -1,0 +1,49 @@
+id: v-h-engulfing-performs-differently-by-session
+hypothesis_id: h-engulfing-performs-differently-by-session
+tested_on: '2026-08-20'
+symbols:
+- AUDUSD
+- EURJPY
+- EURUSD
+- GBPJPY
+- GBPUSD
+- USDCAD
+- USDJPY
+- XAUUSD
+timeframe: PERIOD_M5
+n: 261
+result: inconclusive
+metrics:
+  win_rate: 54.02
+  expectancy: 0.056
+  sample_size: 261
+  chi2: 0.9907
+  sessions_compared: 3
+p_value: 0.60935
+effect_size: 0.061611
+dataset_sha256: 115de15b937bb894835d9ff0fa2e3c554f7910c9d528d51546d90e75460b6df2
+method: Chi-square test of independence on win/loss by session, engulfing patterns only.
+multiple_testing_correction: none
+breakdowns:
+  by_session:
+    LONDON:
+      trades: 113
+      wins: 65
+      win_rate: 57.52
+      expectancy: 0.1274
+    LONDON+NY:
+      trades: 91
+      wins: 47
+      win_rate: 51.65
+      expectancy: 0.0336
+    NEW YORK:
+      trades: 57
+      wins: 29
+      win_rate: 50.88
+      expectancy: -0.0498
+caveats:
+- Only engulfing patterns are included; other patterns are out of scope for this hypothesis.
+- Sessions are as labelled by the indicator, so LONDON+NY is the overlap rather than a fourth independent
+  session.
+- n=261 against a required 767 for the claimed effect size. The p-value is reported for completeness but
+  the test cannot distinguish a real effect from none at this sample.

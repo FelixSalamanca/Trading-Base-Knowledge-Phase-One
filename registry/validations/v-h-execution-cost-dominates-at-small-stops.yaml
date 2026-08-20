@@ -1,0 +1,89 @@
+id: v-h-execution-cost-dominates-at-small-stops
+hypothesis_id: h-execution-cost-dominates-at-small-stops
+tested_on: '2026-08-20'
+symbols:
+- AUDUSD
+- EURJPY
+- EURUSD
+- GBPJPY
+- GBPUSD
+- USDCAD
+- USDJPY
+- XAUUSD
+timeframe: PERIOD_M5
+n: 592
+result: supported
+metrics:
+  win_rate: 53.37837837837838
+  expectancy: 0.030378378378378368
+  sample_size: 592
+  mean_reward_on_win_rr1: 0.8073
+  mean_cost_r: 0.5208
+  net_expectancy: -0.4904088427624604
+  share_below_floor_pct: 16.22
+  share_below_floor_ci_low_pct: 13.47
+  share_below_floor_ci_high_pct: 19.4
+  gross_expectancy_expensive_half: 0.040249999999999994
+  gross_expectancy_cheap_half: 0.020506756756756745
+  net_expectancy_expensive_half: -0.7195744609272533
+  net_expectancy_cheap_half: -0.2612432245976676
+  gross_p_value: 0.376039
+p_value: 0.0
+effect_size: -0.433254
+dataset_sha256: 115de15b937bb894835d9ff0fa2e3c554f7910c9d528d51546d90e75460b6df2
+method: Arithmetic break-even floor per symbol from w=(1+cost_r)/(1+rr), plus Mann-Whitney U on gross
+  and net R between the expensive and cheap halves split at median cost_r. Wilson interval on the share
+  of trades below the floor.
+multiple_testing_correction: none
+breakdowns:
+  by_symbol:
+    AUDUSD:
+      floor_price: 0.000273
+      mean_stop_price: 0.000272
+      trades_below_floor: 45
+      trades: 77
+    EURJPY:
+      floor_price: 0.030969
+      mean_stop_price: 0.066536
+      trades_below_floor: 1
+      trades: 84
+    EURUSD:
+      floor_price: 0.000248
+      mean_stop_price: 0.000368
+      trades_below_floor: 15
+      trades: 70
+    GBPJPY:
+      floor_price: 0.03964
+      mean_stop_price: 0.082065
+      trades_below_floor: 1
+      trades: 77
+    GBPUSD:
+      floor_price: 0.000273
+      mean_stop_price: 0.000519
+      trades_below_floor: 4
+      trades: 80
+    USDCAD:
+      floor_price: 0.00031
+      mean_stop_price: 0.000417
+      trades_below_floor: 30
+      trades: 74
+    USDJPY:
+      floor_price: 0.024775
+      mean_stop_price: 0.070288
+      trades_below_floor: 0
+      trades: 59
+    XAUUSD:
+      floor_price: 0.433565
+      mean_stop_price: 6.953239
+      trades_below_floor: 0
+      trades: 71
+  gross_rank_biserial: 0.0399
+caveats:
+- 'The floor is arithmetic, not statistical: once cost_r exceeds the reward multiple, break-even needs
+  a win rate above 100%.'
+- Cost is modelled from the REALISTIC scenario, not measured from a live account -- the demo feed records
+  zero spread on every bar.
+- Trades are split at the median cost_r, so the two halves also differ in symbol mix; the gross comparison
+  is what guards against reading that mix as an effect.
+- Gross performance is statistically flat across the cost range (p=0.376), so the net difference is attributable
+  to cost rather than to small-stop trades being worse setups.

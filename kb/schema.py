@@ -280,6 +280,10 @@ class Hypothesis:
     status: str = "untested"
     #: Filled once a validation exists.
     validation_id: str | None = None
+    #: An inconclusive test leaves the hypothesis untested -- it did not answer
+    #: the question -- but the attempt is recorded so the same underpowered
+    #: test is not run again and again expecting a different answer.
+    last_attempt: dict | None = None
     felix_inputs: list[str] = field(default_factory=list)
     notes: str = ""
 
@@ -335,6 +339,7 @@ class Hypothesis:
             sample_required=data.get("sample_required"),
             status=data.get("status", "untested"),
             validation_id=data.get("validation_id"),
+            last_attempt=data.get("last_attempt"),
             felix_inputs=list(data.get("felix_inputs", [])),
             notes=data.get("notes", ""),
         )

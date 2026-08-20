@@ -33,6 +33,64 @@ def cmd_validate() -> int:
     return 0
 
 
+def cmd_test(kb, args) -> int:
+    """Run one or every runnable hypothesis and record what came back."""
+    from kb import validation
+
+    if args.all:
+        wanted = [h for h in validation.RUNNERS if h in kb.hypotheses]
+    elif args.hypothesis_id:
+        wanted = [args.hypothesis_id]
+    else:
+        print("Give a hypothesis id, or --all.", file=sys.stderr)
+        return 2
+
+    try:
+        frame = validation.journal()
+    except validation.FelixUnavailable as exc:
+        print(f"Cannot test: {exc}", file=sys.stderr)
+        return 1
+
+    dataset = validation.fingerprint(frame)
+    print(f"dataset {dataset[:16]}...  {len(frame)} rows\n")
+
+    exit_code = 0
+    for hypothesis_id in wanted:
+        if hypothesis_id not in kb.hypotheses:
+            print(f"Unknown hypothesis {hypothesis_id!r}", file=sys.stderr)
+            exit_code = 1
+            continue
+        runner = validation.RUNNERS.get(hypothesis_id)
+        if runner is None:
+            print(f"No runner implemented for {hypothesis_id!r}", file=sys.stderr)
+            exit_code = 1
+            continue
+
+        outcome = runner(kb)
+        print(f"[{hypothesis_id}]")
+        print(f"  {kb.hypotheses[hypothesis_id].statement.strip()}")
+        print(f"  RESULT   : {outcome.result.upper()}")
+        print(f"  n        : {outcome.n:,}")
+        print(f"  p-value  : {outcome.p_value:.4f}")
+        print(f"  effect   : {outcome.effect_size:+.4f}")
+        print(f"  method   : {' '.join(outcome.method.split())}")
+        for name, value in outcome.metrics.items():
+            print(f"    {name:34} {value}")
+        for caveat in outcome.caveats:
+            print(f"  caveat: {' '.join(caveat.split())}")
+
+        if args.dry_run:
+            print("  (dry run -- nothing written)\n")
+            continue
+
+        validation_id = f"v-{hypothesis_id}"
+        path = validation.write_validation(hypothesis_id, outcome, dataset, validation_id)
+        validation.update_hypothesis_status(hypothesis_id, outcome, validation_id)
+        print(f"  written  : {path.relative_to(path.parent.parent.parent)}\n")
+
+    return exit_code
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="kb",
@@ -59,6 +117,15 @@ def main(argv: list[str] | None = None) -> int:
     p_against = sub.add_parser("against", help="what contradicts a concept")
     p_against.add_argument("concept_id")
 
+    p_test = sub.add_parser("test", help="run a hypothesis against the FelixScalper journal")
+    p_test.add_argument("hypothesis_id", nargs="?", help="omit with --all")
+    p_test.add_argument("--all", action="store_true", help="run every runnable hypothesis")
+    p_test.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="compute and print, but write no validation and change no status",
+    )
+
     args = parser.parse_args(argv)
 
     # Windows consoles default to cp1252, which cannot encode the arrows and
@@ -76,6 +143,9 @@ def main(argv: list[str] | None = None) -> int:
     except SchemaError as exc:
         print(f"SCHEMA ERROR: {exc}", file=sys.stderr)
         return 1
+
+    if args.command == "test":
+        return cmd_test(kb, args)
 
     handlers = {
         "summary": lambda: query.summary(kb),

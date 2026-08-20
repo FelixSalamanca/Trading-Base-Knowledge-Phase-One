@@ -1,0 +1,136 @@
+id: v-h-hour-of-day-carries-an-edge
+hypothesis_id: h-hour-of-day-carries-an-edge
+tested_on: '2026-08-20'
+symbols:
+- AUDUSD
+- EURJPY
+- EURUSD
+- GBPJPY
+- GBPUSD
+- USDCAD
+- USDJPY
+- XAUUSD
+timeframe: PERIOD_M5
+n: 592
+result: inconclusive
+metrics:
+  win_rate: 53.38
+  expectancy: 0.0304
+  sample_size: 592
+  hours_tested: 14
+  best_raw_p: 0.0462
+  best_fdr_p: 0.5915
+  hours_surviving_fdr: 0
+p_value: 0.591511
+effect_size: 0.3522
+dataset_sha256: 115de15b937bb894835d9ff0fa2e3c554f7910c9d528d51546d90e75460b6df2
+method: Fisher exact test per hour against all other hours pooled, Benjamini-Hochberg correction across
+  the hours tested.
+multiple_testing_correction: benjamini-hochberg
+breakdowns:
+  by_hour:
+    '8':
+      trades: 61
+      win_rate: 49.18
+      expectancy: -0.0639
+      p_raw: 0.5011
+      p_fdr: 1.0
+      survives_fdr: false
+    '9':
+      trades: 56
+      win_rate: 51.79
+      expectancy: 0.0314
+      p_raw: 0.8882
+      p_fdr: 1.0
+      survives_fdr: false
+    '10':
+      trades: 47
+      win_rate: 57.45
+      expectancy: 0.0383
+      p_raw: 0.6482
+      p_fdr: 1.0
+      survives_fdr: false
+    '11':
+      trades: 58
+      win_rate: 53.45
+      expectancy: 0.0489
+      p_raw: 1.0
+      p_fdr: 1.0
+      survives_fdr: false
+    '12':
+      trades: 46
+      win_rate: 50.0
+      expectancy: -0.0049
+      p_raw: 0.6475
+      p_fdr: 1.0
+      survives_fdr: false
+    '13':
+      trades: 42
+      win_rate: 54.76
+      expectancy: 0.1097
+      p_raw: 0.874
+      p_fdr: 1.0
+      survives_fdr: false
+    '14':
+      trades: 48
+      win_rate: 56.25
+      expectancy: 0.1247
+      p_raw: 0.7633
+      p_fdr: 1.0
+      survives_fdr: false
+    '15':
+      trades: 51
+      win_rate: 50.98
+      expectancy: 0.0075
+      p_raw: 0.7699
+      p_fdr: 1.0
+      survives_fdr: false
+    '16':
+      trades: 53
+      win_rate: 54.72
+      expectancy: 0.0402
+      p_raw: 0.8859
+      p_fdr: 1.0
+      survives_fdr: false
+    '17':
+      trades: 36
+      win_rate: 41.67
+      expectancy: -0.2013
+      p_raw: 0.169
+      p_fdr: 0.5915
+      survives_fdr: false
+    '18':
+      trades: 39
+      win_rate: 69.23
+      expectancy: 0.2652
+      p_raw: 0.0462
+      p_fdr: 0.5915
+      survives_fdr: false
+    '19':
+      trades: 26
+      win_rate: 38.46
+      expectancy: -0.2463
+      p_raw: 0.1586
+      p_fdr: 0.5915
+      survives_fdr: false
+    '20':
+      trades: 19
+      win_rate: 73.68
+      expectancy: 0.356
+      p_raw: 0.1002
+      p_fdr: 0.5915
+      survives_fdr: false
+    '21':
+      trades: 10
+      win_rate: 50.0
+      expectancy: -0.0847
+      p_raw: 1.0
+      p_fdr: 1.0
+      survives_fdr: false
+caveats:
+- 14 hours tested; at alpha=0.05 roughly 0.7 would look significant by chance alone, which is why only
+  the FDR-corrected column is read.
+- Hours with fewer than 10 trades are excluded rather than reported on.
+- Hour is taken from the broker's server clock as recorded in the journal.
+- n=592 against a required 767. A null result here is consistent with no effect, but does not establish
+  one.

@@ -175,15 +175,56 @@ def test_the_shipped_knowledge_base_is_internally_consistent(real_kb):
     assert real_kb.unbacked_claims() == []
 
 
-def test_nothing_is_validated_yet_so_nothing_may_influence_trading(real_kb):
-    """Guards the headline promise of the project.
+def test_no_belief_without_a_measurement(real_kb):
+    """The headline promise: nothing is believed that was not measured.
 
-    The moment this fails, a validation exists -- and it should only exist
-    because a real test produced one.
+    Every hypothesis claiming a result must name a validation that exists, and
+    that validation must carry a dataset fingerprint. There is no path from
+    "an author said so" to "our system believes it" that skips this.
     """
-    assert real_kb.validations == {}
     for hypothesis in real_kb.hypotheses.values():
-        assert hypothesis.status in ("untested", "unfalsifiable")
+        if hypothesis.status in ("supported", "rejected"):
+            assert hypothesis.validation_id, (
+                f"{hypothesis.id} claims {hypothesis.status} with no validation"
+            )
+            validation = real_kb.validations[hypothesis.validation_id]
+            assert validation.n > 0
+            assert len(validation.dataset_sha256) == 64
+
+
+def test_an_inconclusive_test_does_not_settle_anything(real_kb):
+    """A test too small to separate the possibilities has not answered the question.
+
+    It must leave the hypothesis open and merely record the attempt, otherwise
+    an underpowered null retires a live question on false grounds.
+    """
+    for validation in real_kb.validations.values():
+        if validation.result != "inconclusive":
+            continue
+        hypothesis = real_kb.hypotheses[validation.hypothesis_id]
+        assert hypothesis.status == "untested", (
+            f"{hypothesis.id} was settled by an inconclusive test"
+        )
+        assert hypothesis.last_attempt, (
+            f"{hypothesis.id} was tested inconclusively but keeps no record of it"
+        )
+
+
+def test_every_validation_tests_a_registered_hypothesis(real_kb):
+    for validation in real_kb.validations.values():
+        assert validation.hypothesis_id in real_kb.hypotheses
+
+
+def test_an_underpowered_result_is_never_reported_as_settled(real_kb):
+    """Sample below what the hypothesis requires cannot yield supported/rejected."""
+    for validation in real_kb.validations.values():
+        hypothesis = real_kb.hypotheses[validation.hypothesis_id]
+        required = hypothesis.sample_required or 0
+        if validation.n < required:
+            assert validation.result == "inconclusive", (
+                f"{validation.id}: n={validation.n} is below the required "
+                f"{required} but claims {validation.result}"
+            )
 
 
 def test_every_extracted_concept_carries_a_real_citation(real_kb):

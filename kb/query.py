@@ -191,6 +191,12 @@ def untested(kb: KnowledgeBase) -> str:
         lines.append("      refuted if:")
         lines.append(_wrap(hypothesis.invalidated_by, indent="        "))
         lines.append(f"      needs n = {hypothesis.sample_required:,}")
+        if hypothesis.last_attempt:
+            attempt = hypothesis.last_attempt
+            lines.append(
+                f"      tried   : {attempt.get('date', '?')} -- "
+                f"{attempt.get('reason', 'no reason recorded')}"
+            )
         if hypothesis.derived_from:
             lines.append(f"      from    : {', '.join(hypothesis.derived_from)}")
         lines.append("")
