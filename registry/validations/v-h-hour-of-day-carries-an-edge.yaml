@@ -1,6 +1,6 @@
 id: v-h-hour-of-day-carries-an-edge
 hypothesis_id: h-hour-of-day-carries-an-edge
-tested_on: '2026-08-20'
+tested_on: '2026-08-21'
 symbols:
 - AUDUSD
 - EURJPY

@@ -1,0 +1,70 @@
+id: v-h-retest-events-outperform-breakout-events
+hypothesis_id: h-retest-events-outperform-breakout-events
+tested_on: '2026-08-21'
+symbols:
+- AUDUSD
+- EURJPY
+- EURUSD
+- GBPJPY
+- GBPUSD
+- USDCAD
+- USDJPY
+- XAUUSD
+timeframe: PERIOD_M5
+n: 530
+result: inconclusive
+metrics:
+  win_rate: 53.18
+  expectancy: 0.0278
+  sample_size: 530
+  retest_trades: 143
+  retest_win_rate: 51.75
+  retest_expectancy: -0.0131
+  breakout_trades: 387
+  breakout_win_rate: 52.45
+  breakout_expectancy: 0.0224
+  chi2_p: 0.962849
+  mannwhitney_p: 0.955192
+p_value: 0.955192
+effect_size: -0.003018
+dataset_sha256: 1f6ef7b46272feb8af1983636b2def0250782cab52c497edfece0a2f70be6222
+method: Chi-square on win/loss and Mann-Whitney U on realised R, retest events against breakout events,
+  using the sr_event labels the indicator already records.
+multiple_testing_correction: none
+breakdowns:
+  by_sr_event:
+    Bearish Retest:
+      trades: 45
+      win_rate: 44.44
+      expectancy: -0.1454
+    Breakout Down:
+      trades: 122
+      win_rate: 46.72
+      expectancy: -0.1031
+    Breakout Up:
+      trades: 265
+      win_rate: 55.09
+      expectancy: 0.0802
+    Bullish Retest:
+      trades: 98
+      win_rate: 55.1
+      expectancy: 0.0476
+    NONE:
+      trades: 27
+      win_rate: 59.26
+      expectancy: 0.0591
+    Resistance Rejection:
+      trades: 18
+      win_rate: 44.44
+      expectancy: -0.1998
+    Support Rejection:
+      trades: 23
+      win_rate: 73.91
+      expectancy: 0.5143
+caveats:
+- Both arms come from the same signal engine under one configuration. This compares what happens after
+  each event type, not what would happen if the system required a retest before signalling -- that is
+  h-retest-beats-immediate-breakout and needs a configuration change.
+- Event labels are assigned by the indicator's own S/R registry, so the comparison inherits whatever that
+  registry counts as a retest.
+- Signals carrying neither label are excluded from both arms.

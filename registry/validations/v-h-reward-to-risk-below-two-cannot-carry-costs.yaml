@@ -1,6 +1,6 @@
 id: v-h-reward-to-risk-below-two-cannot-carry-costs
 hypothesis_id: h-reward-to-risk-below-two-cannot-carry-costs
-tested_on: '2026-08-20'
+tested_on: '2026-08-21'
 symbols:
 - AUDUSD
 - EURJPY

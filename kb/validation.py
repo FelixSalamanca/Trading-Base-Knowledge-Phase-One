@@ -872,7 +872,105 @@ def test_reward_to_risk_floor(kb: KnowledgeBase) -> TestOutcome:
     )
 
 
+def test_retest_vs_breakout(kb: KnowledgeBase) -> TestOutcome:
+    """Does a retested level beat the breakout that created it?
+
+    Settles an argument three sources take part in. Kevin Ho recommends both
+    entering the break (Pattern 1) and waiting for the pullback (Pattern 5)
+    without acknowledging the tension. Tony Oz names the tension and declines to
+    choose, saying he uses both. Linda Raschke's contribution sits on the
+    momentum side.
+
+    The indicator already labels both event types, so this needs no
+    configuration change -- only a comparison of signals it has been recording
+    all along.
+    """
+    from scipy import stats
+
+    frame = journal()
+    decided = frame[frame["is_decided"]].copy()
+
+    retest = decided[decided["sr_event"].str.contains("Retest", case=False, na=False)]
+    breakout = decided[decided["sr_event"].str.contains("Breakout", case=False, na=False)]
+
+    if len(retest) < 20 or len(breakout) < 20:
+        raise FelixUnavailable("Not enough of both event types to compare.")
+
+    table = [
+        [int(retest["is_win"].sum()), int(len(retest) - retest["is_win"].sum())],
+        [int(breakout["is_win"].sum()), int(len(breakout) - breakout["is_win"].sum())],
+    ]
+    chi2, chi_p, _, _ = stats.chi2_contingency(table)
+
+    u_stat, u_p = stats.mannwhitneyu(
+        retest["realised_r"].to_numpy(dtype=float),
+        breakout["realised_r"].to_numpy(dtype=float),
+        alternative="two-sided",
+    )
+    effect = float(2.0 * u_stat / (len(retest) * len(breakout)) - 1.0)
+
+    n = int(len(retest) + len(breakout))
+    hypothesis = kb.hypotheses["h-retest-events-outperform-breakout-events"]
+    required = hypothesis.sample_required or 0
+
+    retest_better = float(retest["realised_r"].mean()) > float(breakout["realised_r"].mean())
+    p_value = float(min(chi_p, u_p))
+
+    if n < required:
+        result = "inconclusive"
+    elif p_value <= 0.05 and retest_better:
+        result = "supported"
+    else:
+        result = "rejected"
+
+    by_event = {}
+    for name, group in decided.groupby("sr_event"):
+        by_event[str(name)] = {
+            "trades": int(len(group)),
+            "win_rate": round(float(group["is_win"].mean() * 100.0), 2),
+            "expectancy": round(float(group["realised_r"].mean()), 4),
+        }
+
+    return TestOutcome(
+        result=result,
+        p_value=p_value,
+        effect_size=effect,
+        metrics={
+            "win_rate": round(float(decided["is_win"].mean() * 100.0), 2),
+            "expectancy": round(float(decided["realised_r"].mean()), 4),
+            "sample_size": n,
+            "retest_trades": int(len(retest)),
+            "retest_win_rate": round(float(retest["is_win"].mean() * 100.0), 2),
+            "retest_expectancy": round(float(retest["realised_r"].mean()), 4),
+            "breakout_trades": int(len(breakout)),
+            "breakout_win_rate": round(float(breakout["is_win"].mean() * 100.0), 2),
+            "breakout_expectancy": round(float(breakout["realised_r"].mean()), 4),
+            "chi2_p": round(float(chi_p), 6),
+            "mannwhitney_p": round(float(u_p), 6),
+        },
+        method=(
+            "Chi-square on win/loss and Mann-Whitney U on realised R, retest "
+            "events against breakout events, using the sr_event labels the "
+            "indicator already records."
+        ),
+        breakdowns={"by_sr_event": by_event},
+        caveats=[
+            "Both arms come from the same signal engine under one configuration. "
+            "This compares what happens after each event type, not what would "
+            "happen if the system required a retest before signalling -- that is "
+            "h-retest-beats-immediate-breakout and needs a configuration change.",
+            "Event labels are assigned by the indicator's own S/R registry, so "
+            "the comparison inherits whatever that registry counts as a retest.",
+            "Signals carrying neither label are excluded from both arms.",
+        ],
+        symbols=sorted(decided["symbol"].unique().tolist()),
+        timeframe="PERIOD_M5",
+        n=n,
+    )
+
+
 RUNNERS: dict[str, Callable[[KnowledgeBase], TestOutcome]] = {
+    "h-retest-events-outperform-breakout-events": test_retest_vs_breakout,
     "h-reward-to-risk-below-two-cannot-carry-costs": test_reward_to_risk_floor,
     "h-twenty-trades-is-enough-to-judge-an-edge": test_twenty_trades_is_enough,
     "h-losing-runs-cluster": test_losing_runs_cluster,

@@ -1,0 +1,48 @@
+slug: day-trading-wizard-oz
+title: "Day Trading Wizard: Using High Probability Support and Resistance Levels"
+author: "Tony Oz"
+year: 2000
+publication: "Traders' Library. Originally 'Secrets to Successful Short-Term Trading', recorded at the Online Trading Expo"
+source_file: sources/structure/Day Trading Wizard - Tony Oz.pdf
+source_sha256: null
+pages: 18
+categories:
+  - support_resistance
+  - market_structure
+  - trade_management
+  - price_action
+extraction_status: complete
+
+notes: >
+  Priority book #6, the one missing from the library until now, and the most
+  relevant source in it -- because support and resistance is the most developed
+  engine in FelixScalper. The S/R registry already implements zones rather than
+  lines, strength grading 1-4, and a lifecycle running
+  ACTIVE -> BROKEN -> RETESTED -> INVALIDATED. Until this book arrived there
+  was nothing to compare that design against.
+
+  **The source PDF is not yet in this repository.** This extraction was made
+  from the full text supplied in conversation, which covers all 18 pages
+  including both worked examples and the December 1999 case studies.
+  `source_sha256` is therefore null and the hash check skips it. Adding the
+  file to `sources/structure/` and recording its digest would close that gap;
+  every claim below is already page-referenced against the supplied text.
+
+  Two things constrain everything drawn from it:
+
+  1. **Instrument and era.** US equities in 1999-2000, at the peak of the
+     dot-com bubble, with prices still quoted in fractions. His examples
+     include YHOO gaining 22 9/16 points in twelve minutes and DISH running
+     from 71 to 98 in three days. Those are not ordinary market conditions and
+     the setups were selected from them. The *structural* observations about
+     levels transfer; the pace does not.
+
+  2. **Evidence is worked examples.** Six trades shown, one of them a loser
+     (bought at 95, stopped at 93 7/8). Showing a loser at all puts him ahead
+     of most trading writing, but six hand-picked trades from one quarter is
+     an anecdote, and every concept below is marked accordingly.
+
+  What makes this book unusually useful anyway: his central claim maps onto
+  data we already hold. The journal records 145 retest events against 393
+  breakouts, so "a broken level becomes support when tested again" is
+  answerable today rather than after a collection period.

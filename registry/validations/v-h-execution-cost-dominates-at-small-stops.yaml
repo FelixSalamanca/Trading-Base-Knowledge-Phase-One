@@ -1,6 +1,6 @@
 id: v-h-execution-cost-dominates-at-small-stops
 hypothesis_id: h-execution-cost-dominates-at-small-stops
-tested_on: '2026-08-20'
+tested_on: '2026-08-21'
 symbols:
 - AUDUSD
 - EURJPY

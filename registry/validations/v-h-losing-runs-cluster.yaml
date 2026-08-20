@@ -1,6 +1,6 @@
 id: v-h-losing-runs-cluster
 hypothesis_id: h-losing-runs-cluster
-tested_on: '2026-08-20'
+tested_on: '2026-08-21'
 symbols:
 - AUDUSD
 - EURJPY

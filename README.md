@@ -168,10 +168,10 @@ expecting a different answer.
 | | |
 |---|---|
 | Books in the library | 15 PDFs + 2 text conversions |
-| Extraction modules | 5 — `lbr-scalp-setups`, `trading-in-the-zone`, `25-rules-of-trading-discipline`, `money-management-landry`, `technical-market-indicators` |
-| Source concepts | 32 |
-| Hypotheses registered | 14 — 9 open, 3 settled, 2 unfalsifiable |
-| Validations | 7 |
+| Extraction modules | 6 — adds `day-trading-wizard-oz` |
+| Source concepts | 39 |
+| Hypotheses registered | 16 — 11 open, 3 settled, 2 unfalsifiable |
+| Validations | 8 |
 | Tests | 39 |
 
 ### What our own data has settled so far
@@ -185,6 +185,7 @@ expecting a different answer.
 | Engulfing patterns differ by session | Kevin Ho, p. 36 | inconclusive · n=262 against 767 required |
 | A specific hour carries an edge | Kevin Ho, pp. 35–36 | inconclusive · one hour reached p=0.046 raw, nothing survived FDR |
 | A break-even stop improves expectancy | Zalesky, Rule 3 | inconclusive · upper bound only; 303 of 318 winners went negative first |
+| Retested levels outperform the breakouts that made them | Tony Oz, p. 4 | inconclusive · retest 51.8% / −0.013R against breakout 52.5% / +0.022R, p=0.96 — no separation at all |
 
 The first row is worth pausing on. Landry published 2:1 as a minimum in 2003 from experience, with
 no dataset behind it. Solving our own break-even equation at our own measured hit rate and cost

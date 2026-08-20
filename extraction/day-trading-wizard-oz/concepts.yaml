@@ -1,0 +1,316 @@
+# SOURCE KNOWLEDGE -- what Tony Oz claims.
+#
+# The most directly comparable source in the library: FelixScalper's S/R engine
+# already implements a lifecycle that this book describes in prose. Where the
+# two agree, that is worth knowing. Where they differ -- the stop, above all --
+# the difference is measurable.
+
+- id: oz-broken-level-becomes-support-on-retest
+  category: support_resistance
+  claim: >
+    A consolidation zone that acted as resistance becomes support once it has
+    been successfully penetrated and then tested again -- and the mirror for
+    support becoming resistance. The level is worth trading only after that
+    second test holds.
+  source:
+    book: "Day Trading Wizard"
+    author: "Tony Oz"
+    year: 2000
+    chapter: "Entry Points"
+    page: "4"
+  rationale: >
+    Participants who transacted in the zone defend it from the other side once
+    price returns, which is what turns an old ceiling into a floor.
+  conditions:
+    - "The level must be penetrated successfully first"
+    - "It must then be tested a second time and hold"
+    - "Identified on an intraday chart, planned before the move"
+  assumptions:
+    - "The same participants are still present when price returns"
+    - "A zone can be identified cleanly enough to act on"
+  invalidated_by:
+    - "Retested levels performing no better than untested ones"
+  mechanics:
+    - "role reversal"
+    - "level retest"
+    - "consolidation zone"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    Three worked examples: IMNX 112 1/2-113 held as support the next day; RBAK
+    130 was resistance on 27 Sep, penetrated 8 Oct, held on retest 13 Oct;
+    AMZN bounced 5 1/2 points in 40 minutes off the previous day's high.
+  stance: agrees
+  felix_inputs:
+    - InpDetectRetests
+    - InpRetestProximityATR
+    - InpMinTouches
+  felix_current_behaviour: >
+    Implemented as a lifecycle: a level moves ACTIVE -> BROKEN -> RETESTED and
+    the journal records Bullish Retest and Bearish Retest as distinct sr_event
+    values. 145 retest events exist against 393 breakouts.
+  notes: >
+    The single most testable claim in the library, and answerable today. Oz
+    says a retested level is the high-probability entry; FelixScalper already
+    labels both events, so retest and breakout signals can be compared directly
+    on data we hold. Registered as h-retest-events-outperform-breakout-events.
+
+- id: oz-levels-are-zones-not-lines
+  category: support_resistance
+  claim: >
+    Support and resistance are consolidation periods with width -- "a
+    consolidation period between 112 1/2 to 113" -- rather than single prices.
+  source:
+    book: "Day Trading Wizard"
+    author: "Tony Oz"
+    year: 2000
+    chapter: "Entry Points"
+    page: "4"
+  rationale: >
+    Price transacted across a range while the zone formed, so the zone is where
+    the participants are, not one tick inside it.
+  conditions: []
+  assumptions:
+    - "Zone width can be identified consistently"
+  invalidated_by:
+    - "Single-price levels performing as well as zones"
+  mechanics:
+    - "consolidation zone"
+    - "zone width"
+  evidence_quality: anecdote
+  author_claimed_result: "Illustrated, not measured."
+  stance: agrees
+  felix_inputs:
+    - InpDrawZones
+    - InpZoneHalfWidthATR
+    - InpLevelClusterATR
+  felix_current_behaviour: >
+    Levels are drawn and scored as zones with a half-width of 0.2 x ATR, and
+    levels within 0.25 x ATR merge into one.
+  notes: >
+    Complete agreement, arrived at independently. Oz identifies zones by eye;
+    FelixScalper defines them as an ATR fraction, which is the same idea made
+    reproducible. Worth recording as a design already validated by an outside
+    source even though neither has measured it.
+
+- id: oz-in-the-money-is-volatility-relative
+  category: trade_management
+  claim: >
+    "In the money" means different things for different instruments. A point on
+    a stock that moves twenty points in ten minutes is noise; a point on a
+    slower stock is a real gain. Judge profit against the instrument's own
+    volatility.
+  source:
+    book: "Day Trading Wizard"
+    author: "Tony Oz"
+    year: 2000
+    chapter: "Managing trades"
+    page: "2"
+  rationale: >
+    A fixed point figure means nothing without the volatility it sits against.
+  conditions: []
+  assumptions: []
+  invalidated_by:
+    - "A fixed point threshold performing as well across instruments of different volatility"
+  mechanics:
+    - "volatility normalisation"
+    - "ATR-relative thresholds"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  stance: agrees
+  felix_inputs:
+    - InpStopLossATR
+    - InpTakeProfit1ATR
+    - InpSRProximityATR
+  felix_current_behaviour: >
+    Every distance in the system is an ATR multiple -- stop, all three targets,
+    zone width, level clustering, proximity. Nothing is expressed in fixed
+    points.
+  notes: >
+    The clearest example in the library of a book stating in prose what the
+    system already enforces in code. It also marks the sharpest contrast with
+    Kevin Ho, whose scalping setups are entirely fixed-point ("1-point stop",
+    "2-point gain") because he traded one instrument. Oz traded many and
+    reached the ATR-relative view; FelixScalper trades eight and does the same.
+
+- id: oz-stop-goes-just-below-support
+  category: trade_management
+  claim: >
+    Place the stop just below the support level being traded, rather than at a
+    fixed distance from entry.
+  source:
+    book: "Day Trading Wizard"
+    author: "Tony Oz"
+    year: 2000
+    chapter: "Entry Points"
+    page: "4"
+  rationale: >
+    The level is the reason for the trade, so the trade is wrong precisely when
+    the level fails -- and not before.
+  conditions:
+    - "A clearly identified level to place the stop beneath"
+  assumptions:
+    - "Level failure is the right invalidation, and the resulting distance is affordable"
+  invalidated_by:
+    - "Structure-based stops producing worse expectancy than volatility-based ones"
+  mechanics:
+    - "structure-based stop"
+    - "level invalidation"
+  evidence_quality: anecdote
+  author_claimed_result: "Shown on the IMNX chart; no aggregate figures."
+  stance: contradicts
+  felix_inputs:
+    - InpStopLossATR
+  felix_current_behaviour: >
+    The stop is 1.2 x ATR from entry regardless of where the nearest level sits.
+    Structure plays no part in stop placement.
+  notes: >
+    The most consequential disagreement this book raises, because stop distance
+    is the variable currently blocking the project. A structure-based stop is
+    sometimes wider than 1.2 x ATR and sometimes tighter -- and cost as a share
+    of risk moves inversely with it, which is the mechanism behind the
+    supported cost result.
+
+    Deliberately excluded from the pre-registered R:R sweep, which holds the
+    stop fixed so the ratio is not confounded with cost-as-share-of-risk.
+    Registered separately as h-structure-based-stop-beats-atr-stop and
+    explicitly queued behind the sweep.
+
+- id: oz-two-entries-support-or-breakout
+  category: price_action
+  claim: >
+    There are two entries worth taking: buying at intraday support, or buying
+    once price trades above the previous day's high. Both are used; neither is
+    preferred.
+  source:
+    book: "Day Trading Wizard"
+    author: "Tony Oz"
+    year: 2000
+    chapter: "Entry Points"
+    page: "2, 6"
+  rationale: >
+    "Many professional traders like to buy a stock once it trades higher than
+    the previous day's high. I use both methods."
+  conditions:
+    - "Do not chase a gap above the entry price -- wait for the pullback instead"
+  assumptions:
+    - "Both work, under conditions the author does not separate"
+  invalidated_by:
+    - "One method dominating the other across a large sample"
+  mechanics:
+    - "pullback entry"
+    - "breakout entry"
+    - "previous day high/low"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    DIIG bought on a 52-week breakout ran from 39 1/4 to 45; IMNX bought at
+    retested support ran to 130 1/2 in three days.
+  conflicts_with:
+    - ho-15-minute-opening-range-scalp
+    - ho-5-minute-standard-deviation-scalp
+  stance: extends
+  felix_inputs:
+    - InpBreakoutRetestMode
+    - InpUsePrevDayLevels
+  felix_current_behaviour: >
+    Both are detected and scored. InpUsePrevDayLevels is true, so previous-day
+    high and low are registry levels. InpBreakoutRetestMode is false, so a
+    breakout is credited immediately without requiring a retest.
+  notes: >
+    A third voice in the breakout-versus-pullback argument, and the only one
+    that declines to choose. Kevin Ho recommends both in different patterns
+    without acknowledging the tension; Oz names it and says he uses both. That
+    makes the disagreement conditional rather than absolute, and
+    h-retest-events-outperform-breakout-events is what settles it on our data.
+
+- id: oz-key-intraday-times
+  category: strategy_concepts
+  claim: >
+    The trading day has structure: the first half hour is very volatile,
+    10:00-10:30 EST is when reversals occur, positions are best entered
+    10:00-11:30, activity slows over lunch, volume returns 14:00-15:00, and the
+    last twenty minutes reveal how traders are positioning overnight.
+  source:
+    book: "Day Trading Wizard"
+    author: "Tony Oz"
+    year: 2000
+    chapter: "Classic Times"
+    page: "6"
+  rationale: >
+    Participation is not uniform through the session, and neither is the
+    quality of a move.
+  conditions:
+    - "US equity session hours"
+  assumptions:
+    - "The clock itself carries information"
+  invalidated_by:
+    - "No measurable difference in outcome by hour"
+  mechanics:
+    - "time-of-day"
+    - "session structure"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  stance: unrelated
+  felix_inputs:
+    - InpSessionFilter
+  felix_current_behaviour: >
+    Sessions are filtered (Asian off, London and New York on) but no hour is
+    treated as special.
+  notes: >
+    The second source to claim a specific-hour edge, after Kevin Ho's 10 and 3
+    o'clock jiggles -- and notably, Oz's key hour is also 10:00-10:30 EST. Two
+    independent authors naming the same half hour is more interesting than one.
+
+    But both describe US equity sessions, and our own test of the underlying
+    claim returned inconclusive-leaning-null: one hour reached p=0.046 raw and
+    nothing survived FDR correction across 14 hours. Recorded as corroboration
+    of a claim our data does not currently support.
+
+- id: oz-never-let-a-profit-become-a-loss
+  category: trade_management
+  claim: >
+    Once a position is in the money, move the stop to break-even and trail it
+    with a logical risk-reward ratio. If a stock bought at 75 with a 95 target
+    is trading at 90, you cannot let it fall back to 80 -- that risks ten
+    points to capture five. Time stops belong in the plan too, for the
+    opportunity cost of sitting in a trade too long.
+  source:
+    book: "Day Trading Wizard"
+    author: "Tony Oz"
+    year: 2000
+    chapter: "Managing trades"
+    page: "2"
+  rationale: >
+    Open profit is capital at risk like any other, and the reward remaining
+    must justify what is still being risked to hold it.
+  conditions:
+    - "'In the money' judged relative to the instrument's volatility"
+  assumptions:
+    - "The break-even stop costs less in stopped winners than it saves"
+  invalidated_by:
+    - "Winners routinely retracing through break-even before working"
+  mechanics:
+    - "break-even stop"
+    - "trailing stop"
+    - "time stop"
+    - "risk-reward on the remaining move"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    Trailed out of AMZN at 88 1/4 after a run to 90.
+  stance: contradicts
+  felix_inputs:
+    - InpBreakEvenAtR
+  felix_current_behaviour: >
+    InpBreakEvenAtR is 0.0 -- disabled. No trailing stop and no time stop
+    exist.
+  notes: >
+    The third independent source for the break-even stop, after Zalesky's Rule
+    3 and Landry's Rule 13, and the second for time stops after Kevin Ho. Three
+    practitioners across different instruments converging is the strongest
+    agreement in the library on any actionable idea.
+
+    Our own measurement is the reason it stays unadopted rather than the
+    reason to adopt it: 303 of 318 winners went negative at some point, with
+    mean winner MAE of 0.39 R. That is precisely the invalidating condition Oz
+    names, and it is present in our data. The upper bound on the benefit is
+    +0.24 R and it is an upper bound only, because the journal records one MAE
+    figure rather than the price path.

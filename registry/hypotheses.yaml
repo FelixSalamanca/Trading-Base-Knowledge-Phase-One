@@ -90,7 +90,7 @@
 
     '
   last_attempt:
-    date: '2026-08-20'
+    date: '2026-08-21'
     validation_id: v-h-engulfing-performs-differently-by-session
     reason: inconclusive -- sample below the required size
 - id: h-hour-of-day-carries-an-edge
@@ -121,7 +121,7 @@
 
     '
   last_attempt:
-    date: '2026-08-20'
+    date: '2026-08-21'
     validation_id: v-h-hour-of-day-carries-an-edge
     reason: inconclusive -- sample below the required size
 - id: h-execution-cost-dominates-at-small-stops
@@ -253,7 +253,7 @@
     is therefore an upper bound on the benefit, and must be reported as one. The feature already exists
     in the indicator, so the confirming test needs a value change and a collection period, not new code.'
   last_attempt:
-    date: '2026-08-20'
+    date: '2026-08-21'
     validation_id: v-h-break-even-stop-improves-expectancy
     reason: inconclusive -- sample below the required size
 - id: h-losing-runs-cluster
@@ -397,3 +397,63 @@
 
     Cannot be answered from the existing journal: tracking stops at the first target touched, so MFE is
     censored at the target for every winner and wider targets cannot be simulated backwards.'
+- id: h-retest-events-outperform-breakout-events
+  category: support_resistance
+  statement: Signals taken on a retest of a broken level produce better expectancy than signals taken
+    on the breakout itself.
+  derived_from:
+  - oz-broken-level-becomes-support-on-retest
+  - oz-two-entries-support-or-breakout
+  - ho-15-minute-opening-range-scalp
+  - ho-5-minute-standard-deviation-scalp
+  measurable_as: Group existing journal rows by sr_event and compare win rate and expectancy for Bullish/Bearish
+    Retest against Breakout Up/Down, with a chi-square on win/loss and Mann-Whitney U on realised R. Both
+    event types are already labelled by the indicator, so no configuration change is needed.
+  invalidated_by: Retest signals showing expectancy equal to or below breakout signals, or a difference
+    that does not survive the sample size available.
+  testability: existing_data_full
+  sample_required: 767
+  status: untested
+  felix_inputs:
+  - InpDetectRetests
+  - InpRetestProximityATR
+  - InpBreakoutRetestMode
+  notes: 'Answerable today: 145 retest events against 393 breakouts already recorded. Distinct from h-retest-beats-immediate-breakout,
+    which asks whether *requiring* a retest before crediting a breakout improves the system and needs
+    a configuration change. This one compares the two event types the indicator already distinguishes,
+    and settles the breakout-versus-pullback argument running through Kevin Ho, Tony Oz and Linda Raschke
+    on our own data rather than by choosing an author.
+
+
+    Adjudicates all four sources at once. Kevin Ho''s Pattern 1 enters the break and his Pattern 5 waits
+    for the pullback; Tony Oz names the same tension and declines to choose. One comparison on our own
+    event labels settles every pairing between them.'
+  last_attempt:
+    date: '2026-08-21'
+    validation_id: v-h-retest-events-outperform-breakout-events
+    reason: inconclusive -- sample below the required size
+- id: h-structure-based-stop-beats-atr-stop
+  category: trade_management
+  statement: Placing the stop just beyond the nearest structural level produces better expectancy than
+    a fixed ATR multiple from entry.
+  derived_from:
+  - oz-stop-goes-just-below-support
+  measurable_as: Add a structure-based stop mode and compare against the current 1.2 x ATR stop, holding
+    the reward multiple and every other input fixed. Report expectancy, mean stop distance, mean cost_r,
+    and net expectancy under the REALISTIC scenario.
+  invalidated_by: Structure-based stops producing equal or worse net expectancy, or producing stops so
+    tight that cost as a share of risk rises and cancels any gain in accuracy.
+  testability: needs_new_data
+  sample_required: 3483
+  status: untested
+  felix_inputs:
+  - InpStopLossATR
+  notes: 'Queued deliberately BEHIND the pre-registered R:R sweep, and the ordering matters. The sweep
+    holds the stop at 1.2 x ATR precisely so the reward ratio is not confounded with cost as a share of
+    risk. Introducing a variable stop at the same time would change both at once and make neither interpretable.
+
+
+    It is also the more interesting variable of the two. Cost as a share of risk moves inversely with
+    stop distance, and that relationship is the mechanism behind the supported cost result -- so a stop
+    rule that systematically widens stops could address the blocker in a way widening targets cannot.
+    Needs its own pre-registration once the sweep concludes.'
