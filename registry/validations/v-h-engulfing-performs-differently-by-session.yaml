@@ -11,17 +11,17 @@ symbols:
 - USDJPY
 - XAUUSD
 timeframe: PERIOD_M5
-n: 261
+n: 262
 result: inconclusive
 metrics:
-  win_rate: 54.02
-  expectancy: 0.056
-  sample_size: 261
-  chi2: 0.9907
+  win_rate: 54.2
+  expectancy: 0.0589
+  sample_size: 262
+  chi2: 0.8843
   sessions_compared: 3
-p_value: 0.60935
-effect_size: 0.061611
-dataset_sha256: 115de15b937bb894835d9ff0fa2e3c554f7910c9d528d51546d90e75460b6df2
+p_value: 0.642655
+effect_size: 0.058096
+dataset_sha256: 1f6ef7b46272feb8af1983636b2def0250782cab52c497edfece0a2f70be6222
 method: Chi-square test of independence on win/loss by session, engulfing patterns only.
 multiple_testing_correction: none
 breakdowns:
@@ -37,13 +37,13 @@ breakdowns:
       win_rate: 51.65
       expectancy: 0.0336
     NEW YORK:
-      trades: 57
-      wins: 29
-      win_rate: 50.88
-      expectancy: -0.0498
+      trades: 58
+      wins: 30
+      win_rate: 51.72
+      expectancy: -0.0346
 caveats:
 - Only engulfing patterns are included; other patterns are out of scope for this hypothesis.
 - Sessions are as labelled by the indicator, so LONDON+NY is the overlap rather than a fourth independent
   session.
-- n=261 against a required 767 for the claimed effect size. The p-value is reported for completeness but
+- n=262 against a required 767 for the claimed effect size. The p-value is reported for completeness but
   the test cannot distinguish a real effect from none at this sample.

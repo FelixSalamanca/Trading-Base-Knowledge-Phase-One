@@ -142,18 +142,51 @@ what makes the library actionable rather than abstract: a claim about level stre
 
 ---
 
+## Testing a hypothesis
+
+```bash
+python -m kb test <hypothesis-id>     # run one
+python -m kb test --all               # run every implemented runner
+python -m kb test <id> --dry-run      # compute and print, write nothing
+```
+
+Tests read the FelixScalper journal through `FELIX_REPO` (default `C:\FelixBot`) and never write
+to it. Two rules the runners hold to:
+
+**Never test a definition.** `cost_r` is *defined* as cost divided by risk, so correlating the two
+recovers the definition and reports it as a discovery. Where a quantity is arithmetically linked to
+what it is supposed to predict, the test is built on something the market decides instead.
+
+**Underpowered is not null.** A sample below what the hypothesis requires yields `inconclusive`,
+leaves the hypothesis `untested`, and records the attempt so the same weak test is not repeated
+expecting a different answer.
+
+---
+
 ## Status
 
 | | |
 |---|---|
 | Books in the library | 15 PDFs + 2 text conversions |
-| Extraction modules complete | 1 — `lbr-scalp-setups` |
-| Source concepts | 7 |
-| Hypotheses registered | 6 — 5 testable, 1 unfalsifiable |
-| **Validated** | **0** |
+| Extraction modules | 3 — `lbr-scalp-setups`, `trading-in-the-zone`, `25-rules-of-trading-discipline` |
+| Source concepts | 21 |
+| Hypotheses registered | 11 — 7 open, 2 settled, 2 unfalsifiable |
+| Validations | 6 |
+| Tests | 39 |
 
-Nothing has been validated yet. Therefore nothing in this repository may currently influence a
-trading decision, and `test_nothing_is_validated_yet_so_nothing_may_influence_trading` enforces
-exactly that until a real measurement produces a validation file.
+### What our own data has settled so far
 
-Requires Python 3.11+ and PyYAML.
+| Claim | Source | Result |
+|---|---|---|
+| Below some stop distance no win rate can pay | Kevin Ho's cost assumption | **SUPPORTED** · n=598, p<0.0001 |
+| A 20-trade sample is enough to judge an edge | Mark Douglas, ch. 11 | **REJECTED** · a single 20-trade window carries a 45-point confidence interval, and 55% of windows contradict the full sample |
+| Losing trades cluster rather than falling independently | Zalesky vs Douglas | **SUPPORTED** · p=0.0042, though only 1 of 8 symbols clusters on its own sequence |
+| Engulfing patterns differ by session | Kevin Ho, p. 36 | inconclusive · n=262 against 767 required |
+| A specific hour carries an edge | Kevin Ho, pp. 35–36 | inconclusive · one hour reached p=0.046 raw, nothing survived FDR |
+| A break-even stop improves expectancy | Zalesky, Rule 3 | inconclusive · upper bound only; 303 of 318 winners went negative first |
+
+Nothing reaches a trading decision on a book's authority. Every row above was measured on our own
+journal, and `test_no_belief_without_a_measurement` fails the build if a hypothesis ever claims a
+result without a validation carrying `n`, a p-value and a dataset fingerprint.
+
+Requires Python 3.11+, PyYAML, and pypdf for extraction.

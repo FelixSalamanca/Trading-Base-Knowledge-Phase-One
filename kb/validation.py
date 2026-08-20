@@ -422,7 +422,331 @@ def test_hour_of_day(kb: KnowledgeBase) -> TestOutcome:
     )
 
 
+def test_twenty_trades_is_enough(kb: KnowledgeBase) -> TestOutcome:
+    """Is a 20-trade sample enough to judge an edge, as Douglas advises?
+
+    This one needs no significance test, because the question is not whether
+    an effect exists. The system behind every window is identical -- same
+    inputs, same scoring, unchanged throughout -- so any disagreement between
+    windows is sampling noise by construction. The measurement is simply: how
+    far apart do windows of a given size land?
+
+    If 20-trade windows range from clearly-winning to clearly-losing while
+    nothing about the system changed, then 20 trades cannot support the
+    judgement Douglas asks it to carry, however sound his underlying advice to
+    stop judging trade by trade.
+    """
+    import numpy as np
+    from scipy import stats
+
+    frame = journal()
+    decided = frame[frame["is_decided"]].sort_values("signal_time")
+    wins = decided["is_win"].to_numpy(dtype=float)
+    overall = float(wins.mean())
+
+    sizes = [20, 50, 100, 250]
+    profile: dict[str, dict[str, float]] = {}
+    for size in sizes:
+        count = len(wins) // size
+        if count < 2:
+            continue
+        rates = np.array([wins[i * size:(i + 1) * size].mean() for i in range(count)]) * 100.0
+        # Would a trader reading one window conclude the opposite of the truth?
+        # The system is break-even-ish, so "winning" and "losing" verdicts both occur.
+        verdict_flips = int(((rates > 50.0) != (overall * 100 > 50.0)).sum())
+        profile[str(size)] = {
+            "windows": count,
+            "min_win_rate": round(float(rates.min()), 2),
+            "max_win_rate": round(float(rates.max()), 2),
+            "spread_pp": round(float(rates.max() - rates.min()), 2),
+            "std_pp": round(float(rates.std(ddof=1)), 2),
+            "windows_disagreeing_with_the_full_sample": verdict_flips,
+            "share_disagreeing_pct": round(100.0 * verdict_flips / count, 1),
+        }
+
+    twenty = profile.get("20")
+    if twenty is None:
+        raise FelixUnavailable("Not enough trades to form two 20-trade windows.")
+
+    # A binomial 95% interval on a single 20-trade window at the observed rate.
+    low, high = stats.binomtest(
+        int(round(overall * 20)), 20, overall
+    ).proportion_ci(confidence_level=0.95)
+    interval_width = float(high - low) * 100.0
+
+    hypothesis = kb.hypotheses["h-twenty-trades-is-enough-to-judge-an-edge"]
+    required = hypothesis.sample_required or 0
+    n = int(len(decided))
+
+    if n < required:
+        result = "inconclusive"
+    elif interval_width > 20.0 or twenty["share_disagreeing_pct"] > 20.0:
+        # A window that cannot place the win rate inside a 20-point band, or
+        # that contradicts the full sample more than one time in five, is not
+        # supporting a judgement.
+        result = "rejected"
+    else:
+        result = "supported"
+
+    caveats = [
+        "No significance test is applied and none is needed: the system is "
+        "unchanged across every window, so all variation between them is "
+        "sampling noise by construction.",
+        "Windows are consecutive and non-overlapping, taken in signal-time "
+        "order across all symbols pooled.",
+        "This measures whether 20 trades can support a verdict. It does not "
+        "test Douglas's broader advice to stop judging an edge trade by trade, "
+        "which our data supports rather than contradicts.",
+    ]
+
+    return TestOutcome(
+        result=result,
+        p_value=1.0,          # deliberately not a hypothesis test; see method
+        effect_size=round(interval_width / 100.0, 4),
+        metrics={
+            "win_rate": round(overall * 100.0, 2),
+            "expectancy": round(float(decided["realised_r"].mean()), 4),
+            "sample_size": n,
+            "single_20_window_ci_width_pp": round(interval_width, 2),
+            "spread_across_20_windows_pp": twenty["spread_pp"],
+            "windows_of_20_disagreeing_pct": twenty["share_disagreeing_pct"],
+        },
+        method=(
+            "Descriptive, not inferential. Consecutive non-overlapping windows "
+            "at 20, 50, 100 and 250 trades; spread and standard deviation of "
+            "win rate across windows, plus the Clopper-Pearson 95% interval "
+            "width for a single 20-trade window."
+        ),
+        breakdowns={"by_window_size": profile},
+        caveats=caveats,
+        symbols=sorted(decided["symbol"].unique().tolist()),
+        timeframe="PERIOD_M5",
+        n=n,
+    )
+
+
+def test_losing_runs_cluster(kb: KnowledgeBase) -> TestOutcome:
+    """Do losses cluster, or is the outcome sequence independent?
+
+    This adjudicates a real disagreement between two sources. Zalesky says
+    reduce size when trading poorly, which only pays if a losing run predicts
+    further losses. Douglas's third fundamental truth says wins and losses are
+    randomly distributed for any given edge, which says it does not.
+
+    It also checks an assumption our own research layer depends on: Monte Carlo
+    resamples the R sequence with replacement, which is only valid if the
+    sequence carries no memory.
+    """
+    import numpy as np
+    from scipy import stats
+
+    frame = journal()
+    decided = frame[frame["is_decided"]].sort_values("signal_time")
+    wins = decided["is_win"].to_numpy(dtype=bool)
+    returns = decided["realised_r"].to_numpy(dtype=float)
+    n = int(len(wins))
+
+    # Wald-Wolfowitz runs test on the win/loss sequence.
+    runs = 1 + int((wins[1:] != wins[:-1]).sum())
+    n1, n2 = int(wins.sum()), int((~wins).sum())
+    expected_runs = (2.0 * n1 * n2) / (n1 + n2) + 1.0
+    var_runs = (
+        2.0 * n1 * n2 * (2.0 * n1 * n2 - n1 - n2)
+        / ((n1 + n2) ** 2 * (n1 + n2 - 1.0))
+    )
+    z = (runs - expected_runs) / (var_runs ** 0.5) if var_runs > 0 else 0.0
+    runs_p = float(2.0 * (1.0 - stats.norm.cdf(abs(z))))
+
+    # Lag-1 autocorrelation on the R sequence.
+    lag1 = float(np.corrcoef(returns[:-1], returns[1:])[0, 1])
+    lag1_p = float(stats.pearsonr(returns[:-1], returns[1:]).pvalue)
+
+    # Longest observed losing streak against what independence predicts.
+    longest = current = 0
+    for won in wins:
+        current = 0 if won else current + 1
+        longest = max(longest, current)
+    loss_rate = n2 / n
+    rng = np.random.default_rng(7)
+    simulated = []
+    for _ in range(5000):
+        draw = rng.random(n) < loss_rate
+        best = run = 0
+        for is_loss in draw:
+            run = run + 1 if is_loss else 0
+            best = max(best, run)
+        simulated.append(best)
+    streak_percentile = float((np.array(simulated) <= longest).mean() * 100.0)
+
+    # Pooling eight symbols could manufacture clustering: correlated pairs
+    # losing together in the same USD move would look like persistence without
+    # any instrument actually repeating itself. Repeating the runs test inside
+    # each symbol separates the two explanations.
+    per_symbol: dict[str, dict[str, float]] = {}
+    clustered_symbols = 0
+    for symbol, group in decided.groupby("symbol"):
+        s_wins = group.sort_values("signal_time")["is_win"].to_numpy(dtype=bool)
+        if len(s_wins) < 30:
+            continue
+        s_runs = 1 + int((s_wins[1:] != s_wins[:-1]).sum())
+        a, b = int(s_wins.sum()), int((~s_wins).sum())
+        if a == 0 or b == 0:
+            continue
+        s_expected = (2.0 * a * b) / (a + b) + 1.0
+        s_var = 2.0 * a * b * (2.0 * a * b - a - b) / ((a + b) ** 2 * (a + b - 1.0))
+        s_z = (s_runs - s_expected) / (s_var ** 0.5) if s_var > 0 else 0.0
+        s_p = float(2.0 * (1.0 - stats.norm.cdf(abs(s_z))))
+        is_clustered = s_p <= 0.05 and s_runs < s_expected
+        clustered_symbols += int(is_clustered)
+        per_symbol[symbol] = {
+            "trades": int(len(s_wins)),
+            "runs": s_runs,
+            "expected": round(s_expected, 2),
+            "z": round(float(s_z), 3),
+            "p": round(s_p, 4),
+            "clustered": bool(is_clustered),
+        }
+
+    hypothesis = kb.hypotheses["h-losing-runs-cluster"]
+    required = hypothesis.sample_required or 0
+    clustered = runs_p <= 0.05 and runs < expected_runs
+
+    if n < required:
+        result = "inconclusive"
+    elif clustered or lag1_p <= 0.05:
+        result = "supported"
+    else:
+        result = "rejected"
+
+    caveats = [
+        "Trades from eight symbols are pooled in signal-time order, so an "
+        "apparent run may be several instruments moving together rather than "
+        "one instrument persisting.",
+        "A null result supports independence, which is what the Monte Carlo in "
+        "the research layer already assumes when it resamples the R sequence.",
+        "Fewer runs than expected means clustering; more means alternation. "
+        "Only the first would justify reducing size after a losing run.",
+        f"{clustered_symbols} of {len(per_symbol)} symbols show clustering on "
+        "their own sequence. If that count is low while the pooled test is "
+        "significant, the pooled effect is correlation between instruments "
+        "rather than persistence within one -- and size reduction after a "
+        "losing run would then be the wrong response to it.",
+    ]
+
+    return TestOutcome(
+        result=result,
+        p_value=min(runs_p, lag1_p),
+        effect_size=lag1,
+        metrics={
+            "win_rate": round(float(wins.mean() * 100.0), 2),
+            "expectancy": round(float(returns.mean()), 4),
+            "sample_size": n,
+            "runs_observed": runs,
+            "runs_expected_if_independent": round(expected_runs, 2),
+            "runs_z": round(float(z), 4),
+            "runs_p": round(runs_p, 6),
+            "lag1_autocorrelation": round(lag1, 4),
+            "lag1_p": round(lag1_p, 6),
+            "longest_losing_streak": longest,
+            "streak_percentile_vs_independent": round(streak_percentile, 1),
+            "symbols_clustering_individually": clustered_symbols,
+            "symbols_tested_individually": len(per_symbol),
+        },
+        method=(
+            "Wald-Wolfowitz runs test on the win/loss sequence, Pearson lag-1 "
+            "autocorrelation on realised R, and the longest observed losing "
+            "streak against 5,000 independent simulations at the same loss rate."
+        ),
+        breakdowns={"per_symbol_runs_test": per_symbol},
+        caveats=caveats,
+        symbols=sorted(decided["symbol"].unique().tolist()),
+        timeframe="PERIOD_M5",
+        n=n,
+    )
+
+
+def test_break_even_stop(kb: KnowledgeBase) -> TestOutcome:
+    """How much could a break-even stop have saved -- at most?
+
+    Censored in one direction, and the direction decides how the answer must be
+    read. Losers rescued can be counted exactly: a losing trade whose ``mfe_r``
+    exceeded the threshold definitely reached it, so a stop moved to entry at
+    that point would have turned -1R into roughly 0R.
+
+    Winners lost cannot be counted at all. The journal stores one ``mae_r``
+    figure, not the path, so a winner that reached the threshold, dipped back
+    through entry and then recovered to target is invisible here. Every figure
+    below is therefore an **upper bound** on the benefit, and the result is
+    reported as inconclusive no matter how large it looks -- an upper bound is
+    not a measurement.
+    """
+    frame = journal()
+    decided = frame[frame["is_decided"]].copy()
+    losers = decided[decided["is_loss"]]
+    winners = decided[decided["is_win"]]
+
+    baseline = float(decided["realised_r"].mean())
+    profile: dict[str, dict[str, float]] = {}
+
+    for threshold in (0.25, 0.5, 0.75, 1.0):
+        rescued = int((losers["mfe_r"] >= threshold).sum())
+        # Upper bound: every rescued loser becomes 0R instead of -1R.
+        gain = rescued * 1.0 / len(decided) if len(decided) else 0.0
+        # How many winners even passed through this zone, i.e. how many are
+        # exposed to the risk this estimate cannot see.
+        exposed = int((winners["mae_r"] > 0).sum())
+        profile[str(threshold)] = {
+            "losers_rescued_at_most": rescued,
+            "losers_rescued_pct": round(100.0 * rescued / len(losers), 1) if len(losers) else 0.0,
+            "expectancy_upper_bound": round(baseline + gain, 4),
+            "winners_exposed_to_unmeasured_risk": exposed,
+        }
+
+    best = max(profile.values(), key=lambda v: v["expectancy_upper_bound"])
+
+    return TestOutcome(
+        result="inconclusive",
+        p_value=1.0,
+        effect_size=round(best["expectancy_upper_bound"] - baseline, 4),
+        metrics={
+            "win_rate": round(float(decided["is_win"].mean() * 100.0), 2),
+            "expectancy": round(baseline, 4),
+            "sample_size": int(len(decided)),
+            "best_expectancy_upper_bound": best["expectancy_upper_bound"],
+            "winners_that_went_negative_at_all": int((winners["mae_r"] > 0).sum()),
+            "mean_winner_mae_r": round(float(winners["mae_r"].mean()), 4),
+        },
+        method=(
+            "Counts losing trades whose recorded MFE exceeded each candidate "
+            "break-even threshold. No significance test: the quantity that "
+            "would decide the question -- winners stopped at break-even before "
+            "reaching target -- is not recoverable from the journal."
+        ),
+        breakdowns={"by_threshold": profile},
+        caveats=[
+            "UPPER BOUND ONLY. Losers rescued are counted exactly; winners lost "
+            "to the same stop cannot be counted, because the journal records a "
+            "single mae_r figure rather than the price path.",
+            f"{int((winners['mae_r'] > 0).sum())} of {len(winners)} winners went "
+            "negative at some point, so the unmeasured population is large, not "
+            "a rounding error.",
+            "Mean winner MAE is a further warning: winners routinely travel a "
+            "long way against the position before working, which is exactly the "
+            "condition under which a break-even stop does damage.",
+            "Settling this needs InpBreakEvenAtR set to a candidate value and a "
+            "fresh collection period. The feature already exists in the "
+            "indicator; only the value is disabled.",
+        ],
+        symbols=sorted(decided["symbol"].unique().tolist()),
+        timeframe="PERIOD_M5",
+        n=int(len(decided)),
+    )
+
+
 RUNNERS: dict[str, Callable[[KnowledgeBase], TestOutcome]] = {
+    "h-twenty-trades-is-enough-to-judge-an-edge": test_twenty_trades_is_enough,
+    "h-losing-runs-cluster": test_losing_runs_cluster,
+    "h-break-even-stop-improves-expectancy": test_break_even_stop,
     "h-execution-cost-dominates-at-small-stops": test_execution_cost_dominates,
     "h-engulfing-performs-differently-by-session": test_engulfing_by_session,
     "h-hour-of-day-carries-an-edge": test_hour_of_day,

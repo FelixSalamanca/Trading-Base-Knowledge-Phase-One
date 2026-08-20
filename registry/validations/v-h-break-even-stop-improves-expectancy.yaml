@@ -1,0 +1,60 @@
+id: v-h-break-even-stop-improves-expectancy
+hypothesis_id: h-break-even-stop-improves-expectancy
+tested_on: '2026-08-20'
+symbols:
+- AUDUSD
+- EURJPY
+- EURUSD
+- GBPJPY
+- GBPUSD
+- USDCAD
+- USDJPY
+- XAUUSD
+timeframe: PERIOD_M5
+n: 598
+result: inconclusive
+metrics:
+  win_rate: 53.18
+  expectancy: 0.0278
+  sample_size: 598
+  best_expectancy_upper_bound: 0.2703
+  winners_that_went_negative_at_all: 303
+  mean_winner_mae_r: 0.3916
+p_value: 1.0
+effect_size: 0.2425
+dataset_sha256: 1f6ef7b46272feb8af1983636b2def0250782cab52c497edfece0a2f70be6222
+method: 'Counts losing trades whose recorded MFE exceeded each candidate break-even threshold. No significance
+  test: the quantity that would decide the question -- winners stopped at break-even before reaching target
+  -- is not recoverable from the journal.'
+multiple_testing_correction: none
+breakdowns:
+  by_threshold:
+    '0.25':
+      losers_rescued_at_most: 145
+      losers_rescued_pct: 51.8
+      expectancy_upper_bound: 0.2703
+      winners_exposed_to_unmeasured_risk: 303
+    '0.5':
+      losers_rescued_at_most: 72
+      losers_rescued_pct: 25.7
+      expectancy_upper_bound: 0.1482
+      winners_exposed_to_unmeasured_risk: 303
+    '0.75':
+      losers_rescued_at_most: 16
+      losers_rescued_pct: 5.7
+      expectancy_upper_bound: 0.0545
+      winners_exposed_to_unmeasured_risk: 303
+    '1.0':
+      losers_rescued_at_most: 0
+      losers_rescued_pct: 0.0
+      expectancy_upper_bound: 0.0278
+      winners_exposed_to_unmeasured_risk: 303
+caveats:
+- UPPER BOUND ONLY. Losers rescued are counted exactly; winners lost to the same stop cannot be counted,
+  because the journal records a single mae_r figure rather than the price path.
+- 303 of 318 winners went negative at some point, so the unmeasured population is large, not a rounding
+  error.
+- 'Mean winner MAE is a further warning: winners routinely travel a long way against the position before
+  working, which is exactly the condition under which a break-even stop does damage.'
+- Settling this needs InpBreakEvenAtR set to a candidate value and a fresh collection period. The feature
+  already exists in the indicator; only the value is disabled.

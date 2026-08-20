@@ -1,0 +1,103 @@
+id: v-h-losing-runs-cluster
+hypothesis_id: h-losing-runs-cluster
+tested_on: '2026-08-20'
+symbols:
+- AUDUSD
+- EURJPY
+- EURUSD
+- GBPJPY
+- GBPUSD
+- USDCAD
+- USDJPY
+- XAUUSD
+timeframe: PERIOD_M5
+n: 598
+result: supported
+metrics:
+  win_rate: 53.18
+  expectancy: 0.0278
+  sample_size: 598
+  runs_observed: 264
+  runs_expected_if_independent: 298.79
+  runs_z: -2.8595
+  runs_p: 0.004243
+  lag1_autocorrelation: 0.1093
+  lag1_p: 0.007501
+  longest_losing_streak: 14
+  streak_percentile_vs_independent: 99.7
+  symbols_clustering_individually: 1
+  symbols_tested_individually: 8
+p_value: 0.004243
+effect_size: 0.109329
+dataset_sha256: 1f6ef7b46272feb8af1983636b2def0250782cab52c497edfece0a2f70be6222
+method: Wald-Wolfowitz runs test on the win/loss sequence, Pearson lag-1 autocorrelation on realised R,
+  and the longest observed losing streak against 5,000 independent simulations at the same loss rate.
+multiple_testing_correction: none
+breakdowns:
+  per_symbol_runs_test:
+    AUDUSD:
+      trades: 78
+      runs: 32
+      expected: 39.59
+      z: -1.749
+      p: 0.0804
+      clustered: false
+    EURJPY:
+      trades: 86
+      runs: 35
+      expected: 43.16
+      z: -1.806
+      p: 0.0708
+      clustered: false
+    EURUSD:
+      trades: 70
+      runs: 35
+      expected: 35.74
+      z: -0.18
+      p: 0.857
+      clustered: false
+    GBPJPY:
+      trades: 77
+      runs: 35
+      expected: 38.04
+      z: -0.725
+      p: 0.4684
+      clustered: false
+    GBPUSD:
+      trades: 80
+      runs: 39
+      expected: 40.6
+      z: -0.364
+      p: 0.7161
+      clustered: false
+    USDCAD:
+      trades: 74
+      runs: 29
+      expected: 38.0
+      z: -2.107
+      p: 0.0351
+      clustered: true
+    USDJPY:
+      trades: 59
+      runs: 33
+      expected: 30.29
+      z: 0.718
+      p: 0.4731
+      clustered: false
+    XAUUSD:
+      trades: 74
+      runs: 37
+      expected: 37.03
+      z: -0.007
+      p: 0.9948
+      clustered: false
+caveats:
+- Trades from eight symbols are pooled in signal-time order, so an apparent run may be several instruments
+  moving together rather than one instrument persisting.
+- A null result supports independence, which is what the Monte Carlo in the research layer already assumes
+  when it resamples the R sequence.
+- Fewer runs than expected means clustering; more means alternation. Only the first would justify reducing
+  size after a losing run.
+- 1 of 8 symbols show clustering on their own sequence. If that count is low while the pooled test is
+  significant, the pooled effect is correlation between instruments rather than persistence within one
+  -- and size reduction after a losing run would then be the wrong response to it.

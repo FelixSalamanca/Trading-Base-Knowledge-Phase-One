@@ -194,3 +194,117 @@
     mistaken for evidence.
 
     '
+- id: h-twenty-trades-is-enough-to-judge-an-edge
+  category: strategy_concepts
+  statement: A sample of 20 trades is large enough to tell a working edge from a failing one, as Douglas
+    recommends.
+  derived_from:
+  - douglas-judge-an-edge-over-a-sample-of-twenty
+  measurable_as: Split the journal into consecutive non-overlapping 20-trade windows and measure the spread
+    of win rates across them. If windows drawn from one unchanged system disagree with each other by more
+    than the effect a trader would act on, then 20 trades cannot support the judgement Douglas asks it
+    to support. Compare against the same measurement at 100 and 250.
+  invalidated_by: Twenty-trade windows clustering tightly around the overall win rate, so that any single
+    window would lead to the same conclusion as the full sample.
+  testability: existing_data_full
+  sample_required: 400
+  status: rejected
+  felix_inputs: []
+  notes: The one claim in Trading in the Zone that our own data can adjudicate. Douglas offers 20 from
+    experience with no calculation shown; our power analysis puts the requirement at 767 trades for a
+    10-point effect. This test does not need a power calculation to answer it -- it simply shows what
+    conclusions 20-trade windows actually produce when the system behind them has not changed at all.
+  validation_id: v-h-twenty-trades-is-enough-to-judge-an-edge
+- id: h-mindset-not-analysis-drives-consistency
+  category: psychology
+  statement: Consistent results come from the trader's mental state rather than from better analysis or
+    more mechanical setups.
+  derived_from:
+  - douglas-consistency-is-a-mental-state-not-analysis
+  - ho-scalping-definition
+  testability: not_measurable
+  status: unfalsifiable
+  notes: 'Registered to record a real disagreement between two sources: Douglas argues that more analysis
+    is not the answer, while Kevin Ho''s entire contribution is mechanical setups with fixed rules. Both
+    may be right for different traders. Our journal contains no measurement of a mental state, so nothing
+    in it could separate the two positions -- and saying so is more useful than staging a test that could
+    not decide anything.'
+- id: h-break-even-stop-improves-expectancy
+  category: trade_management
+  statement: Moving the stop to entry once a trade reaches a threshold of open profit improves expectancy
+    over letting every loser run to the full stop.
+  derived_from:
+  - zalesky-never-turn-a-winner-into-a-loser
+  measurable_as: 'Set InpBreakEvenAtR from 0.0 (disabled) to a candidate threshold and compare expectancy
+    against the current arm. Partial evidence is available immediately from recorded excursions: for every
+    losing trade, mfe_r says whether it ever reached the threshold, so the trades a break-even stop would
+    have rescued can be counted exactly.'
+  invalidated_by: The number of winners that would have been stopped at break-even before reaching target
+    outweighing the losers rescued.
+  testability: existing_data_censored
+  sample_required: 767
+  status: untested
+  felix_inputs:
+  - InpBreakEvenAtR
+  notes: 'Censored in one direction, and the direction matters. Losers rescued can be counted exactly,
+    because a loser with mfe_r above the threshold definitely reached it. Winners lost cannot: the journal
+    records a single mae_r figure, not the path, so a winner that dipped back through break-even after
+    reaching the threshold and then recovered to target is invisible. Any estimate from existing data
+    is therefore an upper bound on the benefit, and must be reported as one. The feature already exists
+    in the indicator, so the confirming test needs a value change and a collection period, not new code.'
+  last_attempt:
+    date: '2026-08-20'
+    validation_id: v-h-break-even-stop-improves-expectancy
+    reason: inconclusive -- sample below the required size
+- id: h-losing-runs-cluster
+  category: risk_management
+  statement: Losing trades cluster rather than being independently distributed, which is what would justify
+    reducing size during a losing run.
+  derived_from:
+  - zalesky-reduce-size-when-trading-poorly
+  measurable_as: 'Test the chronological sequence of trade outcomes for autocorrelation: a runs test on
+    the win/loss sequence and lag-1 autocorrelation on realised_r, per symbol and pooled.'
+  invalidated_by: The outcome sequence being indistinguishable from independent draws, in which case a
+    losing run carries no information about the next trade and reducing size after one lowers expectancy
+    without a proportional reduction in risk.
+  testability: existing_data_full
+  sample_required: 400
+  status: supported
+  felix_inputs: []
+  notes: Adjudicates a genuine disagreement between two sources. Zalesky says reduce size when trading
+    poorly, which only pays if losses cluster. Mark Douglas's third fundamental truth says there is a
+    random distribution between wins and losses for any given edge, which says they do not. Our Monte
+    Carlo already assumes independence when it resamples the R sequence, so this test also checks an assumption
+    the research layer is relying on.
+  validation_id: v-h-losing-runs-cluster
+- id: h-scaling-out-beats-taking-the-single
+  category: trade_management
+  statement: Taking partial profit and leaving a runner produces higher expectancy than closing the whole
+    position at the first target.
+  derived_from:
+  - zalesky-scale-out-of-winners
+  - zalesky-never-take-a-big-loss
+  measurable_as: Model a split exit -- half the position at TP1, half at TP2 -- against closing everything
+    at TP1, using the recorded tp1_hit/tp2_hit flags and rr1/rr2 multiples. Compare expectancy, profit
+    factor and max drawdown across both models via research.analysis.exits.
+  invalidated_by: The runner half contributing less than it costs, so that a full exit at TP1 matches
+    or beats the split.
+  testability: existing_data_censored
+  sample_required: 767
+  status: untested
+  felix_inputs:
+  - InpTakeProfit1ATR
+  - InpTakeProfit2ATR
+  - InpTakeProfit3ATR
+  notes: 'Adjudicates Zalesky against himself: Rules 16-18 say hit singles and never risk a big loss,
+    Rule 20 says scale out and let part run. Both are his, so this is not a question of which author to
+    believe.
+
+
+    Censored, and severely. The indicator stops tracking the instant any target is touched, so a trade
+    recorded as TP1_ONLY says only that price reached TP1 -- whether the runner would have gone on to
+    TP2 or turned and hit the stop is simply absent from the data. Existing figures bound the question
+    rather than answer it: price reaches TP2 on about 15% of trades and TP3 on about 4%, and the all-or-nothing
+    exit models already measured are far worse than the current policy (TP2 always: -0.622R, TP3 always:
+    -0.874R against ACTUAL +0.037R). Settling it properly needs the indicator to keep tracking past the
+    first target.'

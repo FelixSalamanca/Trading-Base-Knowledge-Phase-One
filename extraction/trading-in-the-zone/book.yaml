@@ -1,0 +1,50 @@
+slug: trading-in-the-zone
+title: "Trading in the Zone: Master the Market with Confidence, Discipline and a Winning Attitude"
+author: "Mark Douglas"
+year: 2001
+publication: "New York Institute of Finance"
+source_file: sources/psychology/Trading in the Zone - Mark Douglas.pdf
+source_sha256: 3e572e4db0a79fbdc39ad8af683ac77c9f2902bf9b0f6dc89243f81ff16a6673
+pages: 143
+categories:
+  - psychology
+  - trading_discipline
+  - risk_management
+  - strategy_concepts
+extraction_status: complete
+
+notes: >
+  The most-cited trading psychology book there is, and the one whose extraction
+  needs the most care -- because almost none of it can be tested, and the
+  temptation is either to treat it as gospel or to discard it for that reason.
+  This module does neither. Claims that cannot be measured are extracted with
+  the same rigour as claims that can, and filed where they cannot be mistaken
+  for evidence.
+
+  Douglas's argument is that consistency is a mental state rather than an
+  analytical achievement: the market offers a probabilistic edge, individual
+  outcomes are random relative to one another, and a trader who cannot hold
+  both ideas at once will sabotage a working system. His two organising
+  frameworks are the five fundamental truths (ch. 7) and the seven principles
+  of consistency (ch. 11).
+
+  Three things worth knowing before quoting him:
+
+  1. **His evidence is clinical, not statistical.** Twenty years of coaching
+     traders, presented as argument and illustration. There is no dataset, no
+     control group and no measurement anywhere in the book. That is not a flaw
+     in a psychology text, but it means every concept here carries
+     evidence_quality: none or anecdote, and none of them can be validated on
+     a trade journal.
+
+  2. **One claim is genuinely measurable** and is the most useful thing in the
+     book for our purposes: his insistence on judging an edge over a sample
+     rather than trade by trade, with a specific number attached (20 trades,
+     ch. 11, p. 186). It contradicts nothing we do, but his figure is far below
+     what our own power calculations require, and that disagreement is worth
+     recording precisely.
+
+  3. **The book is about the trader, not the system.** It has nothing to say
+     about reward-to-risk ratios, execution cost, or whether a given edge
+     exists -- the questions currently blocking FelixScalper. Reading it as
+     though it addressed them would be a category error.

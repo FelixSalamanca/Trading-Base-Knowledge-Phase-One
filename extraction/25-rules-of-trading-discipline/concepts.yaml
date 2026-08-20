@@ -1,0 +1,286 @@
+# SOURCE KNOWLEDGE -- what Douglas Zalesky claims.
+#
+# Grouped by theme rather than one entry per rule. Rules that say the same
+# thing in different words are a single concept; rules that touch a real
+# FelixScalper input get their own.
+
+- id: zalesky-never-turn-a-winner-into-a-loser
+  category: trade_management
+  claim: >
+    Never turn a winner into a loser. Once a trade has moved into profit, do
+    not allow it to come back and stop out at a loss.
+  source:
+    book: "The 25 Rules of Trading Discipline"
+    author: "Douglas E. Zalesky"
+    year: 2003
+    chapter: "Rule 3"
+    page: "SFO Feb 2003"
+  rationale: >
+    Giving back an open profit costs twice -- the profit forgone and the loss
+    taken -- and is the error the author considers most corrosive to a
+    trader's confidence.
+  conditions:
+    - "The trade must have reached a meaningful profit first"
+  assumptions:
+    - "Protecting an open profit does not cost more in stopped-out winners than it saves in avoided losses"
+  invalidated_by:
+    - "The protective stop being hit often enough on trades that would have gone on to target that the net effect is negative"
+  mechanics:
+    - "break-even stop"
+    - "profit protection"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    A typical day is described as one third losers, one third scratches and one
+    third winners, still ending profitable -- offered as illustration, with no
+    figures.
+  stance: contradicts
+  felix_inputs:
+    - InpBreakEvenAtR
+  felix_current_behaviour: >
+    FelixScalper has exactly this feature and it is switched off:
+    InpBreakEvenAtR = 0.0 (disabled), so a trade that runs into profit and
+    reverses takes the full stop.
+  notes: >
+    The most directly actionable concept extracted so far. The input already
+    exists, so testing it needs no new code in the indicator -- only a value
+    change and a collection period. Partial evidence is available immediately
+    from recorded excursions, with an important limit noted in the hypothesis.
+
+- id: zalesky-exit-a-trade-that-goes-nowhere
+  category: trade_management
+  claim: >
+    If a trade is not going anywhere within a given timeframe, exit it. Once
+    you recognise the trade is no good, get out immediately rather than hoping
+    it comes back.
+  source:
+    book: "The 25 Rules of Trading Discipline"
+    author: "Douglas E. Zalesky"
+    year: 2003
+    chapter: "Rules 9, 11 and 15"
+    page: "SFO Feb 2003"
+  rationale: >
+    Capital and attention tied up in a stagnant trade are unavailable for the
+    next opportunity, and "it'll come back" is an admission the trade is
+    already wrong.
+  conditions:
+    - "A timeframe defined in advance for what counts as 'going nowhere'"
+  assumptions:
+    - "Stagnant trades resolve unfavourably more often than favourably"
+  invalidated_by:
+    - "Trades that stall and are held going on to reach target as often as those that move immediately"
+  mechanics:
+    - "time-based exit"
+    - "cutting losses early"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  stance: extends
+  felix_inputs:
+    - InpJournalMaxBars
+  felix_current_behaviour: >
+    A signal that resolves neither way within InpJournalMaxBars (100 bars) is
+    marked EXPIRED for journalling purposes, but the indicator has no time
+    stop -- it publishes a stop and targets and nothing else closes the trade.
+  notes: >
+    Kevin Ho's setups all carry the same rule in a much harder form -- exit
+    after 30 seconds, one minute, three minutes. Two independent pit traders
+    arriving at the same principle is worth noting, though both are describing
+    S&P and bond futures rather than M5 forex.
+
+- id: zalesky-never-take-a-big-loss
+  category: risk_management
+  claim: >
+    Never take a big loss -- only a big loss can hurt you. Make a little each
+    day rather than swinging for large wins; hit singles, not home runs.
+  source:
+    book: "The 25 Rules of Trading Discipline"
+    author: "Douglas E. Zalesky"
+    year: 2003
+    chapter: "Rules 16, 17 and 18"
+    page: "SFO Feb 2003"
+  rationale: >
+    Survival is the precondition for everything else: you always want to be
+    able to come back and play the next day.
+  conditions: []
+  assumptions:
+    - "Frequent small gains compound faster than infrequent large ones"
+    - "Execution costs do not consume the small gains"
+  invalidated_by:
+    - "Small targets being eroded by costs to the point of negative expectancy"
+  mechanics:
+    - "loss limitation"
+    - "small consistent targets"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  conflicts_with:
+    - zalesky-scale-out-of-winners
+  stance: agrees
+  felix_inputs:
+    - InpStopLossATR
+    - InpTakeProfit1ATR
+  felix_current_behaviour: >
+    Stops are capped at 1.2 x ATR and TP1 sits at 1.0 x ATR, which is squarely
+    the "hit singles" approach.
+  notes: >
+    Our own validated result complicates this. The strategy already hits
+    singles, and the measured floor test (v-h-execution-cost-dominates-at-
+    small-stops, SUPPORTED, p<0.0001) shows 16.6% of trades sit below the stop
+    distance at which no win rate could pay. Zalesky's assumption that costs do
+    not consume small gains held in a bond pit; it does not hold here. The
+    principle is sound and its precondition is not currently met.
+
+- id: zalesky-scale-out-of-winners
+  category: trade_management
+  claim: >
+    Scaling out of winning positions increases the average win per trade while
+    keeping risk controlled.
+  source:
+    book: "The 25 Rules of Trading Discipline"
+    author: "Douglas E. Zalesky"
+    year: 2003
+    chapter: "Rule 20"
+    page: "SFO Feb 2003"
+  rationale: >
+    Taking partial profit locks in gains while leaving exposure to a larger
+    move.
+  conditions:
+    - "A position large enough to divide"
+  assumptions:
+    - "The remaining portion runs far enough to justify the complexity"
+  invalidated_by:
+    - "The scaled-out portion capturing most of the move, leaving the remainder to give back more than it adds"
+  mechanics:
+    - "partial exits"
+    - "position scaling"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  conflicts_with:
+    - zalesky-never-take-a-big-loss
+  stance: extends
+  felix_inputs:
+    - InpTakeProfit1ATR
+    - InpTakeProfit2ATR
+    - InpTakeProfit3ATR
+  felix_current_behaviour: >
+    Three targets are published, but the journal credits whichever was reached
+    first and stops tracking there. No partial exit is modelled.
+  notes: >
+    The tension with Rule 16-18 is mild but real: "hit singles" says take the
+    small win, "scale out" says leave part on for a larger move. Zalesky holds
+    both, which is coherent only if the runner is free -- and our exit-model
+    comparison suggests it is not, since price reaches TP2 on roughly 15% of
+    trades and TP3 on 4%.
+
+- id: zalesky-one-methodology-applied-repeatedly
+  category: trading_discipline
+  claim: >
+    Develop a methodology and stick with it -- do not change methodologies from
+    day to day. Make the same type of trade over and over; be a bricklayer.
+  source:
+    book: "The 25 Rules of Trading Discipline"
+    author: "Douglas E. Zalesky"
+    year: 2003
+    chapter: "Rules 5, 12 and 21"
+    page: "SFO Feb 2003"
+  rationale: >
+    A methodology that is changed constantly is never actually tested, so its
+    results can never be attributed to anything.
+  conditions:
+    - "The methodology must be proven before it is committed to"
+  assumptions:
+    - "Consistency of application is what makes results interpretable"
+  invalidated_by:
+    - "Not specified"
+  mechanics:
+    - "methodological consistency"
+  evidence_quality: none
+  author_claimed_result: "None offered."
+  stance: agrees
+  felix_inputs: []
+  felix_current_behaviour: >
+    The indicator is frozen for the duration of the forward test precisely so
+    that the sample measures one unchanged system.
+  notes: >
+    Zalesky argues this as discipline; the research layer enforces it as
+    method. Changing an input mid-collection does not just break discipline,
+    it invalidates the sample -- which is the same claim with a statistical
+    reason behind it.
+
+- id: zalesky-reduce-size-when-trading-poorly
+  category: position_sizing
+  claim: >
+    Always lower your trade size when you are trading poorly, and earn the
+    right to trade bigger before increasing it.
+  source:
+    book: "The 25 Rules of Trading Discipline"
+    author: "Douglas E. Zalesky"
+    year: 2003
+    chapter: "Rules 2 and 8"
+    page: "SFO Feb 2003"
+  rationale: >
+    Reducing exposure during a losing run limits the damage of whatever is
+    causing it, whether that is the market or the trader.
+  conditions:
+    - "A definition of 'trading poorly' fixed in advance"
+  assumptions:
+    - "Losing runs cluster rather than being independently distributed"
+  invalidated_by:
+    - "Losing runs being statistically independent, in which case size reduction lowers returns without lowering risk of ruin proportionally"
+  mechanics:
+    - "position sizing"
+    - "drawdown response"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    The author states he never traded more than a fixed maximum size across his
+    career, but gives no figures for the sizing rule itself.
+  stance: unrelated
+  felix_inputs: []
+  felix_current_behaviour: >
+    FelixScalper does not size positions -- it publishes signals. Nothing in
+    the system implements or contradicts this.
+  notes: >
+    The assumption is the testable part and it cuts against the author. If wins
+    and losses are independently distributed -- which is Douglas's third
+    fundamental truth and what our Monte Carlo assumes when it resamples the R
+    sequence -- then a losing run carries no information about the next trade,
+    and reducing size after one lowers expectancy without a matching reduction
+    in risk. Two respected sources disagree here, and the disagreement is
+    testable in principle by checking for autocorrelation in the R sequence.
+
+- id: zalesky-discipline-outweighs-method
+  category: trading_discipline
+  claim: >
+    Trading discipline is ninety percent of the game: trade with discipline and
+    you will succeed, trade without it and you will fail. Be disciplined every
+    day in every trade, and do not claim to be disciplined if you are not 100
+    percent of the time.
+  source:
+    book: "The 25 Rules of Trading Discipline"
+    author: "Douglas E. Zalesky"
+    year: 2003
+    chapter: "Rules 1 and opening"
+    page: "SFO Feb 2003"
+  rationale: >
+    The author reports twenty years of profitable pit trading with no technical
+    or fundamental training whatsoever, which he offers as evidence that method
+    is not the binding constraint.
+  conditions: []
+  assumptions:
+    - "His results generalise beyond open-outcry pit trading"
+  invalidated_by:
+    - "Not specified"
+  mechanics:
+    - "rule adherence"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    Twenty years of profitable trading at the CBOT, CME and LIFFE. A single
+    successful career, reported by its subject.
+  stance: unrelated
+  felix_inputs: []
+  felix_current_behaviour: >
+    Not applicable to an automated signal generator.
+  notes: >
+    Sits alongside Douglas's near-identical argument that consistency is mental
+    rather than analytical. Both are single-practitioner accounts and neither is
+    measurable on a trade journal, so both are filed as principle. The survivorship
+    problem is worth stating once: we do not hear from the equally disciplined
+    traders who failed.

@@ -1,0 +1,43 @@
+slug: 25-rules-of-trading-discipline
+title: "The 25 Rules of Trading Discipline"
+author: "Douglas E. Zalesky"
+year: 2003
+publication: "SFO Magazine, February 2003 (Wasendorf & Associates)"
+source_file: sources/discipline/25-rules-of-forex-trading-discipline.raw-ocr.md
+source_sha256: dde3916ebfef64f5aa022f656cb8dc8000d787b834e60dfbbf4263458c86c496
+pages: null
+categories:
+  - trading_discipline
+  - risk_management
+  - position_sizing
+  - trade_management
+extraction_status: partial
+
+notes: >
+  A short magazine article, not a book, despite the filename. Zalesky was a
+  twenty-year member of the Chicago Board of Trade who traded 30-year Treasury
+  bonds at the CBOT, the S&P 500 at the CME and Gilts at LIFFE. He states
+  openly that he has no formal training in technical or fundamental analysis
+  and could not set up a moving average -- his entire claim is that discipline,
+  not method, produced his results.
+
+  That matters for how the article is used here. It is filed under discipline
+  because that is what it is about; almost none of it describes a setup.
+
+  Two caveats on the extraction:
+
+  1. **It is not about forex.** The filename says forex; the content is
+     futures pit trading. The rules are about behaviour, so most of them
+     transfer, but any claim tied to instrument mechanics does not.
+
+  2. **The OCR is damaged.** Nineteen of the twenty-five rule headings
+     recovered cleanly; the remainder are mangled or lost in the conversion,
+     and the surrounding commentary is missing accented characters throughout.
+     extraction_status is therefore `partial`. The concepts below are grouped
+     by theme rather than one-per-rule, both because that is more useful and
+     because it does not pretend to a completeness the source text cannot
+     support. Re-extracting from the original PDF would close the gap.
+
+  The single most valuable line in the article for our purposes is Rule 3,
+  "never turn a winner into a loser", because it maps onto an input that
+  exists in FelixScalper and is currently switched off.
