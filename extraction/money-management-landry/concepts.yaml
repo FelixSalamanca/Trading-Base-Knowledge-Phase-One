@@ -1,0 +1,323 @@
+# SOURCE KNOWLEDGE -- what Dave Landry claims.
+#
+# The most quantitative source in the library. Where he gives a threshold it is
+# recorded exactly, because a threshold can be checked against our own
+# configuration and our own results in a way a principle cannot.
+
+- id: landry-reward-to-risk-minimum-two-to-one
+  category: risk_management
+  claim: >
+    Keep the reward-to-risk ratio at a minimum of 2:1, preferably 3:1 or
+    higher. Risking one point per trade means making, on average, at least two.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Rule 3"
+    page: "Pt I"
+  rationale: >
+    A system that risks more than it makes needs several winners to pay for one
+    loser, so the first ordinary losing streak removes the account. Landry
+    cites an S&P futures system that risked 3 points to make 1 as the shape to
+    avoid.
+  conditions:
+    - "Measured on average across trades, not on any single trade"
+  assumptions:
+    - "Hit rate does not rise enough to compensate for a worse ratio"
+    - "Execution cost is not the binding constraint"
+  invalidated_by:
+    - "A system with a ratio below 2:1 sustaining positive expectancy across a large sample"
+  mechanics:
+    - "reward-to-risk ratio"
+    - "stop distance"
+    - "target distance"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    No dataset. One counter-example system described qualitatively.
+  stance: contradicts
+  felix_inputs:
+    - InpStopLossATR
+    - InpTakeProfit1ATR
+    - InpTakeProfit2ATR
+    - InpTakeProfit3ATR
+  felix_current_behaviour: >
+    FelixScalper runs at 0.83:1 -- stop at 1.2 x ATR against a first target at
+    1.0 x ATR. Measured mean reward on a win is 0.807 R against a 1.0 R loss.
+  notes: >
+    The single most relevant claim in the library to the problem currently
+    blocking this project, and the only one that names a number our
+    configuration violates. Our own arithmetic agrees with the direction: at
+    0.807 R reward the break-even hit rate is 55.3% before costs and 84% after
+    realistic costs, against a measured 53.2%. Landry's assumption that hit
+    rate does not rise to compensate is testable in principle and is registered
+    as a hypothesis rather than assumed.
+
+- id: landry-drawdown-recovery-is-geometric
+  category: risk_management
+  claim: >
+    Recovering a drawdown requires a larger gain than the loss that caused it,
+    and the gap widens geometrically: 10% lost needs 11.11% to recover, 30%
+    needs 42.85%, 50% needs 100%, 70% needs 233%, 90% needs 900%.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Drawdown"
+    page: "Pt I"
+  rationale: >
+    The gain is earned on the reduced balance, not the original one.
+  conditions: []
+  assumptions: []
+  invalidated_by:
+    - "Nothing. This is arithmetic, not a claim about markets."
+  mechanics:
+    - "drawdown recovery"
+    - "compounding"
+  evidence_quality: peer_reviewed
+  author_claimed_result: "A table, correct by construction."
+  stance: agrees
+  felix_inputs: []
+  felix_current_behaviour: >
+    The research layer reports maximum drawdown in R and runs 10,000 Monte
+    Carlo simulations of the drawdown distribution.
+  notes: >
+    The one concept in the entire library that needs no validation, because it
+    is not a claim about how markets behave. Marked peer_reviewed to
+    distinguish established arithmetic from an author's assertion; it would be
+    equally true if no trader had ever written it down.
+
+- id: landry-risk-two-percent-per-trade
+  category: position_sizing
+  claim: >
+    Risk only a small percentage of total equity per trade, preferably no more
+    than 2% of portfolio value; some long-term successful traders risk under 1%.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Rule 1"
+    page: "Pt I"
+  rationale: >
+    Small per-trade risk is what allows a trader to survive long enough for an
+    edge to express itself.
+  conditions:
+    - "Applied to the whole position, not each leg of it"
+  assumptions:
+    - "The account is adequately capitalised for the market traded"
+  invalidated_by:
+    - "Not specified"
+  mechanics:
+    - "position sizing"
+    - "percent risk"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    Two traders known personally to the author, trading successfully for over
+    15 years at these levels. Interviewees give 0.5% to 2.5%, and state that no
+    professional money manager they know risks more than 5%.
+  stance: unrelated
+  felix_inputs: []
+  felix_current_behaviour: >
+    FelixScalper publishes signals and does not size positions. Nothing in the
+    system implements or contradicts this.
+  notes: >
+    Becomes relevant the moment an EA is written, since a Strategy Tester
+    harness has to size positions to run at all. Recorded now so the number is
+    already in the library when that happens.
+
+- id: landry-active-traders-must-risk-less
+  category: position_sizing
+  claim: >
+    The more active a trader, the less should be risked per trade. A trader
+    making dozens of trades a day cannot afford 2% per trade; a longer-term
+    trader making a few trades a year could risk 3-5%.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Rule 8"
+    page: "Pt I"
+  rationale: >
+    Many trades compress into a short period, so a bad run arrives in a single
+    day rather than over a year.
+  conditions: []
+  assumptions:
+    - "Trade outcomes within a day are not independent enough to diversify"
+  invalidated_by:
+    - "High-frequency outcomes proving independent, so that per-trade risk could stay constant with frequency"
+  mechanics:
+    - "trade frequency"
+    - "position sizing"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  stance: unrelated
+  felix_inputs: []
+  felix_current_behaviour: >
+    The system generates roughly 28 signals a day across 8 symbols, which is
+    firmly in the category Landry says should risk least per trade.
+  notes: >
+    The assumption connects to something we have already measured. Our runs
+    test found the pooled outcome sequence clusters (p=0.0042), with only 1 of
+    8 symbols clustering on its own -- consistent with correlated instruments
+    losing together, which is exactly the mechanism that makes a bad day
+    concentrated rather than diversified. Landry's rule and that result point
+    the same way.
+
+- id: landry-limit-total-portfolio-risk
+  category: risk_management
+  claim: >
+    Limit total portfolio risk to 20%: if every open position stopped out
+    simultaneously, 80% of capital would remain. Correlated positions count as
+    one position, not several.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Rules 2 and 6"
+    page: "Pt I"
+  rationale: >
+    Long heating oil, crude oil and unleaded gas is one position wearing three
+    hats, because those markets move together.
+  conditions:
+    - "Correlation assessed between open positions, not assumed away"
+  assumptions:
+    - "Correlations hold up under stress"
+  invalidated_by:
+    - "Correlated instruments failing to move together when it matters"
+  mechanics:
+    - "portfolio heat"
+    - "position correlation"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  stance: extends
+  felix_inputs:
+    - InpScannerSymbols
+  felix_current_behaviour: >
+    The scanner ranks opportunities across 19 symbols and applies no
+    correlation constraint; several correlated pairs can rank highly at once.
+  notes: >
+    Directly relevant to a result we already hold. Losing runs cluster in the
+    pooled sequence but not within individual symbols, which is the signature
+    of correlated instruments losing together -- exactly what Rule 6 describes.
+    That makes a correlation cap the indicated response rather than reducing
+    size after a loss, and it is the more useful reading of both findings.
+
+- id: landry-take-money-off-the-table-at-one-r
+  category: trade_management
+  claim: >
+    Once open profit exceeds the initial risk, exit half the position and move
+    the stop on the remainder to break-even -- "2-for-1 money management".
+    Lock in at least part of any windfall profit, especially in short-term
+    trading.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Rules 7 and 13"
+    page: "Pt I"
+  rationale: >
+    Converting an open profit into a realised one removes the possibility of
+    giving it all back, while the remainder keeps exposure to a larger move.
+  conditions:
+    - "Open profit must first exceed the initial risk, i.e. 1 R"
+  assumptions:
+    - "The break-even stop on the remainder costs less than it protects"
+  invalidated_by:
+    - "The remainder being stopped at break-even often enough that the full position would have earned more"
+  mechanics:
+    - "partial exit"
+    - "break-even stop"
+    - "1R trigger"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  stance: contradicts
+  felix_inputs:
+    - InpBreakEvenAtR
+    - InpTakeProfit1ATR
+  felix_current_behaviour: >
+    InpBreakEvenAtR is 0.0 (disabled) and no partial exit is modelled. TP1 sits
+    at 0.83 R, so open profit never reaches Landry's 1 R trigger before the
+    first target is already hit.
+  notes: >
+    Sharper than Zalesky's version of the same idea because it names the
+    trigger: 1 R, not "some profit". That matters here, because at a 0.83:1
+    ratio the first target arrives before the trigger would ever fire -- so
+    adopting this rule is impossible without first fixing the ratio. The two
+    claims are connected, and Rule 3 has to be settled first.
+
+- id: landry-always-use-a-real-stop
+  category: trade_management
+  claim: >
+    Always have an actual stop resting in the market. Mental stops do not work.
+    Never add to or average down a losing position.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Rules 10 and 12"
+    page: "Pt I"
+  rationale: >
+    A stop that exists only as an intention is not a stop; averaging down turns
+    a small mistake into a large one.
+  conditions: []
+  assumptions: []
+  invalidated_by:
+    - "Not specified"
+  mechanics:
+    - "hard stop"
+    - "no averaging down"
+  evidence_quality: none
+  author_claimed_result: "None offered."
+  stance: agrees
+  felix_inputs:
+    - InpStopLossATR
+  felix_current_behaviour: >
+    A stop price is computed and published with every signal and written to the
+    journal before the outcome is known. There is no averaging logic anywhere
+    in the system.
+  notes: >
+    Structurally satisfied. Worth recording because it is the clearest example
+    in the library of a discipline rule that a mechanical system converts into
+    architecture -- there is no willpower involved in a stop that is computed.
+
+- id: landry-stop-and-re-evaluate-after-a-losing-string
+  category: trading_discipline
+  claim: >
+    Be willing to stop trading and re-evaluate the markets and the methodology
+    after a string of losses. Strive to keep maximum drawdown between 20 and
+    25%, beyond which recovery becomes increasingly difficult.
+  source:
+    book: "Money Management: Controlling Risk and Capturing Profits"
+    author: "Dave Landry"
+    year: 2003
+    chapter: "Part I, Rules 15 and 16"
+    page: "Pt I"
+  rationale: >
+    Follows from the recovery arithmetic: past roughly 25% the required gain
+    grows faster than the loss.
+  conditions:
+    - "A drawdown threshold fixed in advance"
+  assumptions:
+    - "A losing string carries information about the method rather than being noise"
+  invalidated_by:
+    - "Losing strings of the observed length occurring regularly in a system with an unchanged and positive edge"
+  mechanics:
+    - "drawdown limit"
+    - "trading halt"
+  evidence_quality: anecdote
+  author_claimed_result: "None offered."
+  conflicts_with:
+    - douglas-edge-is-a-probability-not-a-prediction
+  stance: extends
+  felix_inputs: []
+  felix_current_behaviour: >
+    No drawdown limit exists because the indicator does not trade. Maximum
+    drawdown is reported by the research layer at 22.0 R.
+  notes: >
+    The conflict with Mark Douglas is genuine and is the most practically
+    important disagreement in the library so far. Landry says stop and
+    re-evaluate after a losing string; Douglas says a losing string is the
+    expected behaviour of a probabilistic edge and abandoning a system because
+    of one is the classic error. Both cannot be acted on at the same time, and
+    the question is answerable: it turns on whether the observed streak is
+    longer than an unchanged edge would produce, which is measurable and has
+    partly been measured already.

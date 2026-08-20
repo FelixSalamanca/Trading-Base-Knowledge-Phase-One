@@ -1,0 +1,85 @@
+id: v-h-reward-to-risk-below-two-cannot-carry-costs
+hypothesis_id: h-reward-to-risk-below-two-cannot-carry-costs
+tested_on: '2026-08-20'
+symbols:
+- AUDUSD
+- EURJPY
+- EURUSD
+- GBPJPY
+- GBPUSD
+- USDCAD
+- USDJPY
+- XAUUSD
+timeframe: PERIOD_M5
+n: 598
+result: supported
+metrics:
+  win_rate: 53.18
+  expectancy: 0.0278
+  sample_size: 598
+  mean_cost_r: 0.518
+  current_reward_multiple: 0.807
+  required_hit_rate_now_pct: 84.01
+  shortfall_pp: 30.83
+  lowest_reward_multiple_reachable: 2.0
+p_value: 1.0
+effect_size: 0.3083
+dataset_sha256: 1f6ef7b46272feb8af1983636b2def0250782cab52c497edfece0a2f70be6222
+method: Break-even hit rate w=(1+cost_r)/(1+rr) evaluated at the three published targets, where hit rates
+  are observed rather than assumed, then extrapolated across a grid of reward multiples. Deterministic;
+  no significance test applies.
+multiple_testing_correction: none
+breakdowns:
+  observed_at_published_targets:
+    tp1:
+      reward_multiple: 0.807
+      observed_hit_rate: 53.18
+      required_gross: 55.34
+      required_with_cost: 84.01
+      reachable_with_cost: false
+    tp2:
+      reward_multiple: 1.549
+      observed_hit_rate: 8.19
+      required_gross: 39.23
+      required_with_cost: 59.55
+      reachable_with_cost: false
+    tp3:
+      reward_multiple: 2.255
+      observed_hit_rate: 2.17
+      required_gross: 30.72
+      required_with_cost: 46.64
+      reachable_with_cost: false
+  extrapolated_grid:
+    '1.0':
+      required_gross: 50.0
+      required_with_cost: 75.9
+      gap_vs_observed_pp: 22.72
+    '1.5':
+      required_gross: 40.0
+      required_with_cost: 60.72
+      gap_vs_observed_pp: 7.54
+    '2.0':
+      required_gross: 33.33
+      required_with_cost: 50.6
+      gap_vs_observed_pp: -2.58
+    '2.5':
+      required_gross: 28.57
+      required_with_cost: 43.37
+      gap_vs_observed_pp: -9.81
+    '3.0':
+      required_gross: 25.0
+      required_with_cost: 37.95
+      gap_vs_observed_pp: -15.23
+caveats:
+- The three published targets carry observed hit rates. Everything in the extrapolated grid assumes accuracy
+  continues to decay the same way, which is an assumption, not a measurement.
+- The TP2 and TP3 rates are LOWER BOUNDS, not the win rate a hold-to-that-target policy would produce.
+  Tracking stops at the first target touched, so a trade that reached TP1 and was never followed further
+  counts here as not reaching TP2 -- when it might have. The TP1 row carries no such distortion, since
+  it uses the realised win rate, and it is the row the verdict rests on.
+- Widening the target while holding the stop fixed is not the only way to raise the ratio -- tightening
+  the stop raises it too, and would change the hit rate in the opposite direction.
+- Cost is modelled from the REALISTIC scenario. The demo feed records zero spread, so no measured broker
+  cost exists yet.
+- This says which configurations are within reach of the current accuracy. It does not say the system
+  becomes profitable at any of them.

@@ -308,3 +308,61 @@
     exit models already measured are far worse than the current policy (TP2 always: -0.622R, TP3 always:
     -0.874R against ACTUAL +0.037R). Settling it properly needs the indicator to keep tracking past the
     first target.'
+- id: h-reward-to-risk-below-two-cannot-carry-costs
+  category: risk_management
+  statement: A reward-to-risk ratio below 2:1 cannot sustain positive expectancy once realistic execution
+    costs are charged, because the hit rate required exceeds what the system achieves.
+  derived_from:
+  - landry-reward-to-risk-minimum-two-to-one
+  measurable_as: Compute the break-even hit rate w = (1 + cost_r) / (1 + rr) across candidate reward multiples
+    from the current 0.807 up to 3.0, using measured cost_r per symbol, and compare each against the hit
+    rate actually achieved. The reward multiple is a configuration choice, so this asks which choices
+    are reachable at our measured accuracy rather than predicting a market outcome.
+  invalidated_by: The hit rate rising as the target widens, enough to keep the required rate reachable
+    at ratios below 2:1. Landry assumes it does not; that assumption is what is being tested.
+  testability: existing_data_censored
+  sample_required: 400
+  status: supported
+  felix_inputs:
+  - InpStopLossATR
+  - InpTakeProfit1ATR
+  - InpTakeProfit2ATR
+  - InpTakeProfit3ATR
+  notes: 'The most directly relevant hypothesis in the registry to what is currently blocking the project,
+    and the only one derived from a source that names a number our configuration violates: Landry says
+    2:1 minimum, FelixScalper runs 0.83:1.
+
+
+    Censored in the usual direction. Hit rates at wider targets are partly observable -- the journal records
+    tp1_hit, tp2_hit and tp3_hit, so we know how often price reached 1.5x and 2.08x reward. What we cannot
+    see is what a trade would have done had the stop also moved, since tracking ends at the first target
+    touched. The reachable-versus-required comparison is therefore sound for the targets already published
+    and an extrapolation beyond them.'
+  validation_id: v-h-reward-to-risk-below-two-cannot-carry-costs
+- id: h-stop-after-a-losing-string
+  category: trading_discipline
+  statement: A string of losses signals that the method has stopped working and trading should halt, rather
+    than being the normal behaviour of an unchanged edge.
+  derived_from:
+  - landry-stop-and-re-evaluate-after-a-losing-string
+  - douglas-edge-is-a-probability-not-a-prediction
+  measurable_as: Compare the longest observed losing streak against the distribution of longest streaks
+    from simulations of an unchanged edge at the same hit rate. If the observed streak sits inside that
+    distribution, it is what an intact edge produces and carries no signal.
+  invalidated_by: The observed streak falling within the range an unchanged edge produces, in which case
+    halting after one would be abandoning a working system for noise.
+  testability: existing_data_full
+  sample_required: 400
+  status: untested
+  felix_inputs: []
+  notes: 'Adjudicates the sharpest disagreement in the library. Landry (Rules 15-16) says stop and re-evaluate
+    after a losing string; Douglas says a losing string is exactly what a probabilistic edge produces
+    and abandoning a system over one is the classic error. Both cannot be acted on at once.
+
+
+    Partly answered already by v-h-losing-runs-cluster, which found the longest observed streak of 14
+    sitting at the 99.7th percentile of 5,000 independent simulations -- longer than independence predicts,
+    which leans toward Landry. But the same test found only 1 of 8 symbols clustering individually, so
+    the streak may be correlated instruments losing together rather than a method failing. This hypothesis
+    exists to settle which, because the two readings call for opposite actions: halt trading, or cap correlated
+    exposure.'

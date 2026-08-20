@@ -1,0 +1,51 @@
+slug: money-management-landry
+title: "Money Management: Controlling Risk and Capturing Profits"
+author: "Dave Landry"
+year: 2003
+publication: "TradingMarkets / SFO, three-part series"
+source_file: sources/risk/Money_Management_Controlling_Risk_And_Capturing_Profits.pdf
+source_sha256: d6604cbddd86d766ae95b70703c2377459a4451735d76dc451220cd7ee4a49f3
+pages: 20
+categories:
+  - risk_management
+  - position_sizing
+  - trade_management
+  - trading_discipline
+extraction_status: complete
+
+notes: >
+  The most directly relevant source in the library to the problem currently
+  blocking FelixScalper, and the only one so far that states a specific number
+  our configuration violates.
+
+  Landry's Rule 3 is that reward-to-risk should be at minimum 2:1 and
+  preferably 3:1 or higher. FelixScalper runs at 0.83:1 -- it risks 1.2 x ATR
+  to make 1.0 x ATR. Landry describes exactly this shape as the thing to avoid,
+  using an S&P system that "risked 3 points to make only 1" as his cautionary
+  example, and notes that such a system needs three winners for every loser and
+  that the first losing streak wipes the account out. Our configuration is
+  milder than his example but on the same side of the line.
+
+  Structure: seventeen numbered rules across three parts, plus interviews with
+  Mark Boucher, Kevin Haggerty and Mark Ost, and a drawdown-recovery table.
+
+  What makes this source unusually useful here:
+
+  * **It is quantitative.** Most trading writing gives principles; Landry gives
+    thresholds -- 2% risk per trade, 20% total portfolio risk, 2:1 minimum
+    reward-to-risk, 20-25% maximum drawdown. Thresholds can be checked.
+
+  * **Its central arithmetic is not an opinion.** The drawdown recovery table
+    (a 50% loss needs a 100% gain to recover, 70% needs 233%, 90% needs 900%)
+    is arithmetic and holds regardless of market, era or instrument. Unlike
+    most claims in this library it needs no validation, only application.
+
+  * **Several rules are about portfolio and position sizing**, which
+    FelixScalper does not do at all -- it publishes signals and sizes nothing.
+    Those are recorded as `unrelated` rather than stretched to fit.
+
+  Caveat on era and instrument: written in 2003 for US equities and futures.
+  The percentages are about account risk rather than market mechanics, so they
+  transfer more readily than a setup would, but the interviewees' figures come
+  from position trading rather than M5 scalping -- and Landry's own Rule 8 says
+  the more active the trader, the less should be risked per trade.

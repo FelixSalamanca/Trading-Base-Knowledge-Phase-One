@@ -743,7 +743,137 @@ def test_break_even_stop(kb: KnowledgeBase) -> TestOutcome:
     )
 
 
+def test_reward_to_risk_floor(kb: KnowledgeBase) -> TestOutcome:
+    """Which reward multiples are reachable at the hit rate we actually achieve?
+
+    Landry's Rule 3 says 2:1 minimum. FelixScalper runs 0.83:1. The question is
+    not whether he is right in general -- it is which configurations are within
+    reach of a system whose measured accuracy is what it is.
+
+    Break-even hit rate is ``w = (1 + cost_r) / (1 + rr)``, so every candidate
+    reward multiple implies a required accuracy. The journal already records
+    how often price reached each of the three published targets, which gives
+    observed hit rates at three real reward multiples rather than assumed ones.
+    Comparing required against observed at those points is the measurement;
+    anything beyond the widest published target is extrapolation and is
+    labelled as such.
+    """
+    _, costs, _, _, get_settings = _load_research()
+    frame = journal()
+    settings = get_settings()
+    realistic = next(s for s in settings.scenarios if s.name == "REALISTIC")
+    adjusted, breakdown = costs.apply_scenario(frame, realistic)
+    decided = adjusted[adjusted["is_decided"]].copy()
+
+    cost_r = float(breakdown.mean_cost_r)
+    observed = float(decided["is_win"].mean())
+
+    # Observed reach at each published target -- real, not modelled.
+    reach = {
+        "tp1": {
+            "reward_multiple": round(float(decided["rr1"].mean()), 3),
+            "observed_hit_rate": round(float(decided["tp1_hit"].mean()) * 100.0, 2),
+        },
+        "tp2": {
+            "reward_multiple": round(float(decided["rr2"].mean()), 3),
+            "observed_hit_rate": round(float(decided["tp2_hit"].mean()) * 100.0, 2),
+        },
+        "tp3": {
+            "reward_multiple": round(float(decided["rr3"].mean()), 3),
+            "observed_hit_rate": round(float(decided["tp3_hit"].mean()) * 100.0, 2),
+        },
+    }
+    for key, entry in reach.items():
+        rr = entry["reward_multiple"]
+        entry["required_gross"] = round(100.0 / (1.0 + rr), 2)
+        entry["required_with_cost"] = round(100.0 * (1.0 + cost_r) / (1.0 + rr), 2)
+        entry["reachable_with_cost"] = bool(
+            entry["observed_hit_rate"] >= entry["required_with_cost"]
+        )
+
+    # Extrapolated grid, clearly separated from the observed points above.
+    grid: dict[str, dict[str, float]] = {}
+    for rr in (1.0, 1.5, 2.0, 2.5, 3.0):
+        grid[str(rr)] = {
+            "required_gross": round(100.0 / (1.0 + rr), 2),
+            "required_with_cost": round(100.0 * (1.0 + cost_r) / (1.0 + rr), 2),
+            "gap_vs_observed_pp": round(
+                100.0 * (1.0 + cost_r) / (1.0 + rr) - observed * 100.0, 2
+            ),
+        }
+
+    # Landry's assumption is that hit rate does not rise enough to rescue a
+    # poor ratio. Our own targets let us check the shape of that decay.
+    widening_costs_accuracy = (
+        reach["tp1"]["observed_hit_rate"]
+        > reach["tp2"]["observed_hit_rate"]
+        > reach["tp3"]["observed_hit_rate"]
+    )
+
+    current_required = 100.0 * (1.0 + cost_r) / (1.0 + reach["tp1"]["reward_multiple"])
+    hypothesis = kb.hypotheses["h-reward-to-risk-below-two-cannot-carry-costs"]
+    required_n = hypothesis.sample_required or 0
+    n = int(len(decided))
+
+    if n < required_n:
+        result = "inconclusive"
+    elif widening_costs_accuracy and observed * 100.0 < current_required:
+        result = "supported"
+    else:
+        result = "rejected"
+
+    return TestOutcome(
+        result=result,
+        p_value=1.0,
+        effect_size=round(current_required / 100.0 - observed, 4),
+        metrics={
+            "win_rate": round(observed * 100.0, 2),
+            "expectancy": round(float(decided["realised_r"].mean()), 4),
+            "sample_size": n,
+            "mean_cost_r": round(cost_r, 4),
+            "current_reward_multiple": reach["tp1"]["reward_multiple"],
+            "required_hit_rate_now_pct": round(current_required, 2),
+            "shortfall_pp": round(current_required - observed * 100.0, 2),
+            "lowest_reward_multiple_reachable": next(
+                (float(rr) for rr in sorted(grid, key=float)
+                 if grid[rr]["required_with_cost"] <= observed * 100.0),
+                None,
+            ),
+        },
+        method=(
+            "Break-even hit rate w=(1+cost_r)/(1+rr) evaluated at the three "
+            "published targets, where hit rates are observed rather than "
+            "assumed, then extrapolated across a grid of reward multiples. "
+            "Deterministic; no significance test applies."
+        ),
+        breakdowns={"observed_at_published_targets": reach, "extrapolated_grid": grid},
+        caveats=[
+            "The three published targets carry observed hit rates. Everything "
+            "in the extrapolated grid assumes accuracy continues to decay the "
+            "same way, which is an assumption, not a measurement.",
+            "The TP2 and TP3 rates are LOWER BOUNDS, not the win rate a "
+            "hold-to-that-target policy would produce. Tracking stops at the "
+            "first target touched, so a trade that reached TP1 and was never "
+            "followed further counts here as not reaching TP2 -- when it might "
+            "have. The TP1 row carries no such distortion, since it uses the "
+            "realised win rate, and it is the row the verdict rests on.",
+            "Widening the target while holding the stop fixed is not the only "
+            "way to raise the ratio -- tightening the stop raises it too, and "
+            "would change the hit rate in the opposite direction.",
+            "Cost is modelled from the REALISTIC scenario. The demo feed "
+            "records zero spread, so no measured broker cost exists yet.",
+            "This says which configurations are within reach of the current "
+            "accuracy. It does not say the system becomes profitable at any "
+            "of them.",
+        ],
+        symbols=sorted(decided["symbol"].unique().tolist()),
+        timeframe="PERIOD_M5",
+        n=n,
+    )
+
+
 RUNNERS: dict[str, Callable[[KnowledgeBase], TestOutcome]] = {
+    "h-reward-to-risk-below-two-cannot-carry-costs": test_reward_to_risk_floor,
     "h-twenty-trades-is-enough-to-judge-an-edge": test_twenty_trades_is_enough,
     "h-losing-runs-cluster": test_losing_runs_cluster,
     "h-break-even-stop-improves-expectancy": test_break_even_stop,

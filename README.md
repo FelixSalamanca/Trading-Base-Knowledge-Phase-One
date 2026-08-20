@@ -168,22 +168,28 @@ expecting a different answer.
 | | |
 |---|---|
 | Books in the library | 15 PDFs + 2 text conversions |
-| Extraction modules | 3 — `lbr-scalp-setups`, `trading-in-the-zone`, `25-rules-of-trading-discipline` |
-| Source concepts | 21 |
-| Hypotheses registered | 11 — 7 open, 2 settled, 2 unfalsifiable |
-| Validations | 6 |
+| Extraction modules | 4 — `lbr-scalp-setups`, `trading-in-the-zone`, `25-rules-of-trading-discipline`, `money-management-landry` |
+| Source concepts | 29 |
+| Hypotheses registered | 13 — 8 open, 3 settled, 2 unfalsifiable |
+| Validations | 7 |
 | Tests | 39 |
 
 ### What our own data has settled so far
 
 | Claim | Source | Result |
 |---|---|---|
+| A reward-to-risk ratio below 2:1 cannot carry realistic costs | Dave Landry, Rule 3 | **SUPPORTED** · at 0.807 reward the required hit rate is 84.0% against 53.2% achieved — a 30.8-point shortfall |
 | Below some stop distance no win rate can pay | Kevin Ho's cost assumption | **SUPPORTED** · n=598, p<0.0001 |
 | A 20-trade sample is enough to judge an edge | Mark Douglas, ch. 11 | **REJECTED** · a single 20-trade window carries a 45-point confidence interval, and 55% of windows contradict the full sample |
 | Losing trades cluster rather than falling independently | Zalesky vs Douglas | **SUPPORTED** · p=0.0042, though only 1 of 8 symbols clusters on its own sequence |
 | Engulfing patterns differ by session | Kevin Ho, p. 36 | inconclusive · n=262 against 767 required |
 | A specific hour carries an edge | Kevin Ho, pp. 35–36 | inconclusive · one hour reached p=0.046 raw, nothing survived FDR |
 | A break-even stop improves expectancy | Zalesky, Rule 3 | inconclusive · upper bound only; 303 of 318 winners went negative first |
+
+The first row is worth pausing on. Landry published 2:1 as a minimum in 2003 from experience, with
+no dataset behind it. Solving our own break-even equation at our own measured hit rate and cost
+returns **2.0** as the lowest reward multiple within reach. A rule of thumb and an independent
+measurement landing on the same number is the most useful thing this library has produced so far.
 
 Nothing reaches a trading decision on a book's authority. Every row above was measured on our own
 journal, and `test_no_belief_without_a_measurement` fails the build if a hypothesis ever claims a
