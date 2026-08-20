@@ -1,0 +1,177 @@
+# HYPOTHESIS REGISTRY
+#
+# A concept becomes an entry here only once someone can state what measurement
+# would settle it AND what result would refute it. Both fields are enforced by
+# the schema; an entry that cannot supply them must be filed as `unfalsifiable`,
+# which is a legitimate and useful outcome rather than a failure.
+#
+# `sample_required` is the number of trades needed to detect the claimed effect
+# at 80% power, alpha 0.05, from a 52.4% baseline. Recorded so the queue can be
+# ordered by what is answerable rather than by what sounds exciting.
+#
+# Nothing here is believed. Status starts at `untested` and only a validation
+# file -- carrying n, p-value, effect size and a dataset hash -- can move it.
+
+- id: h-retest-beats-immediate-breakout
+  category: breakouts
+  statement: >
+    Requiring a confirmed retest of a broken level before crediting a breakout
+    improves expectancy compared with crediting the break immediately.
+  derived_from:
+    - ho-5-minute-standard-deviation-scalp
+    - ho-15-minute-opening-range-scalp
+  measurable_as: >
+    Run the journal with InpBreakoutRetestMode = false (current) and = true,
+    holding every other input fixed, and compare expectancy on signals whose
+    sr_event is a breakout. The two source concepts disagree with each other,
+    so this test adjudicates between them on our own data rather than choosing
+    an author to believe.
+  metrics:
+    - win_rate
+    - expectancy
+    - average_r
+    - profit_factor
+    - max_drawdown_r
+    - sample_size
+  breakdowns: [regime, symbol, timeframe, session]
+  invalidated_by: >
+    Retest-confirmed breakouts showing expectancy equal to or below immediate
+    entries, or the retest requirement cutting sample so far that no difference
+    is detectable.
+  testability: needs_new_data
+  sample_required: 3106
+  status: untested
+  felix_inputs:
+    - InpBreakoutRetestMode
+    - InpRetestLookback
+  notes: >
+    Cannot be answered from the existing journal: every recorded row was
+    generated with the retest requirement off, so there is no retest arm to
+    compare against. Needs a configuration change and a fresh collection
+    period, which is why it sits behind the cheaper tests below.
+
+- id: h-engulfing-performs-differently-by-session
+  category: candlestick_patterns
+  statement: >
+    Engulfing patterns produce better expectancy during high-participation
+    sessions than during quiet ones.
+  derived_from:
+    - ho-engulfment-penny-pincher
+  measurable_as: >
+    Group existing journal rows where pattern is a bullish or bearish engulfing
+    by session, and compare win rate and expectancy across London, New York and
+    the London/New York overlap. Uses research.analysis.buckets.by_session on a
+    pattern-filtered frame.
+  invalidated_by: >
+    No difference in expectancy across sessions once the multiple-testing
+    correction is applied.
+  testability: existing_data_full
+  sample_required: 767
+  status: untested
+  felix_inputs:
+    - InpWeightCandle
+    - InpSessionFilter
+  notes: >
+    Answerable today with no change to the indicator -- both `pattern` and
+    `session` are already recorded for all 525 rows. The existing factor screen
+    found `pattern` non-significant when pooled across sessions
+    (Cramer's V 0.075, p_raw 0.882); this hypothesis proposes that the pooling
+    is what hid the effect. If the interaction is also null, that is a real
+    answer and closes the question.
+
+- id: h-hour-of-day-carries-an-edge
+  category: strategy_concepts
+  statement: >
+    Specific hours of the trading day carry a reversal or continuation tendency
+    beyond what the broad session filter already captures.
+  derived_from:
+    - ho-10-oclock-jiggle
+    - ho-3-oclock-jiggle
+  measurable_as: >
+    Group existing journal rows by hour of signal_time and compare expectancy
+    across hours, with Benjamini-Hochberg correction over the 24 comparisons.
+  invalidated_by: >
+    No hour surviving FDR correction, which is the expected outcome given that
+    testing 24 hours guarantees roughly one raw-significant result by chance.
+  testability: existing_data_full
+  sample_required: 767
+  status: untested
+  felix_inputs:
+    - InpSessionFilter
+  notes: >
+    The author's evidence is one week of S&P futures in 2003. A fixed clock
+    hour is among the most overfit-prone claims in trading literature, so the
+    FDR correction is not optional here. Cheap to run and worth closing.
+
+- id: h-execution-cost-dominates-at-small-stops
+  category: risk_management
+  statement: >
+    Below some stop distance, realistic execution cost consumes enough of the
+    risk that no achievable win rate makes the trade positive.
+  derived_from:
+    - ho-scalping-definition
+  measurable_as: >
+    For each symbol, compute cost_r from research.analysis.costs.apply_scenario
+    under the REALISTIC scenario and regress net expectancy on mean stop
+    distance in points.
+  invalidated_by: >
+    Net expectancy showing no relationship with stop distance.
+  testability: existing_data_full
+  sample_required: 100
+  status: untested
+  felix_inputs:
+    - InpStopLossATR
+  notes: >
+    The author assumes execution cost is negligible against his profit
+    objective. Our data suggests the opposite holds for M5 forex, but that has
+    not been stated as a formal hypothesis and tested until now. Already
+    strongly indicated by the per-symbol cost table (AUDUSD 0.891 R cost on a
+    2.7-pip stop versus XAUUSD 0.059 R on a 712-point stop); this entry turns
+    that observation into a recorded, refutable claim.
+
+- id: h-oscillator-slope-filter-improves-momentum
+  category: momentum
+  statement: >
+    Filtering a momentum signal by the slope of the oscillator's own moving
+    average improves expectancy over taking the crossover unfiltered.
+  derived_from:
+    - raschke-the-anti
+  measurable_as: >
+    Add a slope condition to the existing RSI and MACD momentum component and
+    compare expectancy against the current unfiltered scoring, holding all
+    other weights fixed.
+  invalidated_by: >
+    No improvement in expectancy, or an improvement that disappears
+    out-of-sample in walk-forward windows.
+  testability: needs_new_data
+  sample_required: 3106
+  status: untested
+  felix_inputs:
+    - InpWeightMomentum
+    - InpRsiPeriod
+  notes: >
+    Deliberately framed as a filter on the momentum indicators FelixScalper
+    already computes, not as "add a stochastic". Adding an indicator would
+    change several things at once and make the result uninterpretable.
+
+# ---------------------------------------------------------------------------
+# Unfalsifiable -- kept, but never in the research queue.
+# ---------------------------------------------------------------------------
+#
+# These are held as principles. They may well be true and may well be the most
+# important things in the library, but no measurement on our journal could
+# refute them, so they must not sit alongside entries that can be settled.
+
+- id: h-trading-metaphor-shapes-perception
+  category: psychology
+  statement: >
+    The metaphor a trader uses to describe trading shapes their perception and
+    ultimately their results.
+  derived_from:
+    - ho-scalping-definition
+  testability: not_measurable
+  status: unfalsifiable
+  notes: >
+    Kevin Ho opens the article with this, citing Tony Robbins. Nothing in a
+    trade journal could confirm or refute it. Recorded so the claim is not
+    silently dropped, and filed where it cannot be mistaken for evidence.

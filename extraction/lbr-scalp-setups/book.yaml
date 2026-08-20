@@ -1,0 +1,39 @@
+slug: lbr-scalp-setups
+title: "Scalp Trading Methods from the Pit"
+author: "Kevin Ho"
+year: 2003
+publication: "chartpoint magazine, pp. 34-37"
+source_file: sources/scalping/LBR_Scalp_setups.pdf
+source_sha256: 01ecb3b14ba0e2f969c4892143f41e2d1f147b6599e5ea5a74238bbefe9db8aa
+pages: 4
+categories:
+  - scalping
+  - breakouts
+  - mean_reversion
+  - momentum
+extraction_status: complete
+
+notes: >
+  The filename in this repository says "LBR", which is misleading and worth
+  fixing in the reader's head before anything is quoted from it. The article is
+  by Kevin Ho, a floor trader, and presents six of his own setups. Exactly one
+  of them -- Pattern 6, "The ANTI" -- is credited to Linda Bradford Raschke.
+  Attributing the other five to her would misquote both authors.
+
+  Two facts about this source constrain everything drawn from it, and neither is
+  a reason to discard it -- only a reason to test rather than adopt:
+
+  1. Every setup is specified for S&P 500 futures traded from the pit in 2003.
+     Stops and targets are given in index points ("1-point stop", "2-point
+     gain"), not in ATR or any volatility-relative unit. Those numbers cannot
+     be carried across to forex; only the *structure* of each idea can.
+
+  2. The author's evidence is three to nine days of hand-picked charts from a
+     single week of August 2003 -- "all 9 trades for the 9 trading days were
+     winners", "14 out of 15 successful trades". Every concept below therefore
+     carries evidence_quality: anecdote. That is not a criticism of the author,
+     who is transparent about what he is showing; it is a record of what the
+     claim actually rests on.
+
+  The article is still valuable here precisely because several of its ideas
+  disagree with what FelixScalper does today, which makes them testable.

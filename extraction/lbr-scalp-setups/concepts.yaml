@@ -1,0 +1,322 @@
+# SOURCE KNOWLEDGE -- what Kevin Ho claims.
+#
+# Nothing in this file is asserted to be true. There is no field in which
+# truth could be recorded. Each entry says what the author proposes, under
+# which stated conditions, on what he assumes, and what evidence he offered.
+#
+# `stance` and `felix_*` compare each claim with what FelixScalper does today.
+# That comparison is the reason this file is worth more than a highlighted PDF.
+
+- id: ho-scalping-definition
+  category: scalping
+  claim: >
+    Scalping means taking small, consistent profits from trades lasting no more
+    than a few minutes, with extremely small stops and predefined profit
+    objectives -- "a million trades to make a million dollars".
+  source:
+    book: "Scalp Trading Methods from the Pit"
+    author: "Kevin Ho"
+    year: 2003
+    page: "34"
+    publication: "chartpoint"
+  rationale: >
+    High trade frequency with a high hit rate compounds many small edges rather
+    than relying on a few large winners.
+  conditions:
+    - "A highly liquid, actively traded market"
+    - "Execution costs small relative to the profit objective"
+  assumptions:
+    - "S&P 500 futures, pit and early electronic era (2003)"
+    - "Commission and slippage negligible against a 1-point objective"
+  invalidated_by:
+    - "Execution cost consuming a material share of the profit objective"
+  mechanics:
+    - "very short holding period"
+    - "fixed point targets"
+    - "fixed point stops"
+  evidence_quality: anecdote
+  author_claimed_result: >
+    Not quantified as an aggregate; individual patterns reported over a single
+    week of August 2003.
+  stance: agrees
+  felix_inputs: []
+  felix_current_behaviour: >
+    FelixScalper is also a short-horizon system -- median resolution is 3 bars
+    on M5, i.e. 15 minutes. The philosophy matches.
+  notes: >
+    The assumption listed second is the one that matters most to us, and it is
+    the one our own data contradicts. On our M5 forex journal, realistic
+    execution cost is 0.518 R per trade against an average reward of 0.807 R.
+    The author's "costs are negligible" premise held for 2003 S&P futures with a
+    1-point objective; it does not hold for a 2.7-pip AUDUSD stop. This is the
+    clearest example in the whole extraction of why a setup must be re-tested
+    rather than adopted.
+
+- id: ho-15-minute-opening-range-scalp
+  category: breakouts
+  claim: >
+    Wait for the first 15-minute range of the session to form, then enter on a
+    stop 2 ticks beyond its high or low, taking profit immediately at a fixed
+    small target and stopping out at a fixed small loss or after one minute.
+  source:
+    book: "Scalp Trading Methods from the Pit"
+    author: "Kevin Ho"
+    year: 2003
+    page: "35"
+    publication: "chartpoint"
+  rationale: >
+    The opening range defines the session's initial balance; a clean break of
+    it marks a directional thrust that tends to continue briefly.
+  conditions:
+    - "Only at the session open"
+    - "Trade must be exited within one minute regardless of outcome"
+    - "On being stopped out, look for the breakout at the opposite end of the range"
+  assumptions:
+    - "A single, well-defined daily session open -- true for S&P futures"
+    - "Fixed point-based stop and target, not volatility-scaled"
+  invalidated_by:
+    - "Markets without a discrete session open"
+    - "A breakout that does not resolve within about a minute"
+  mechanics:
+    - "opening range"
+    - "stop entry order"
+    - "time-based exit"
+  evidence_quality: anecdote
+  author_claimed_result: "All 9 trades over 9 trading days were winners."
+  conflicts_with:
+    - ho-5-minute-standard-deviation-scalp
+  stance: contradicts
+  felix_inputs:
+    - InpBreakoutRetestMode
+    - InpRetestLookback
+    - InpSessionFilter
+  felix_current_behaviour: >
+    FelixScalper detects breakouts and credits them immediately --
+    InpBreakoutRetestMode is false, so no retest is required. It has no concept
+    of an opening range and no time-based exit; trades resolve at SL or TP.
+  notes: >
+    Forex trades 24 hours with no single opening range, so this cannot be
+    ported literally. The transferable part is the narrower question of whether
+    the *first defined range of a session* behaves differently from any other
+    range -- which our journal can address through the existing session field.
+
+- id: ho-10-oclock-jiggle
+  category: mean_reversion
+  claim: >
+    Around 10am New York the market tends to reverse the intraday trend
+    established from the open; if price is near the intraday high during the
+    first 30 minutes, prepare to go short, and vice versa.
+  source:
+    book: "Scalp Trading Methods from the Pit"
+    author: "Kevin Ho"
+    year: 2003
+    page: "35"
+    publication: "chartpoint"
+  rationale: >
+    A recurring intraday liquidity event produces a predictable turnaround at a
+    fixed clock time.
+  conditions:
+    - "Position must be near the intraday extreme in the first 30 minutes"
+    - "Entry orders cancelled if unfilled by 10:30"
+    - "No re-entry"
+  assumptions:
+    - "US equity index market microstructure, 2003"
+    - "A fixed clock time carries information"
+  invalidated_by:
+    - "The turnaround failing to appear at that clock time in other markets or eras"
+  mechanics:
+    - "time-of-day filter"
+    - "intraday extreme"
+    - "counter-trend entry"
+  evidence_quality: anecdote
+  author_claimed_result: "All trades for the sample week were winners."
+  stance: unrelated
+  felix_inputs:
+    - InpSessionFilter
+    - InpLondonStart
+    - InpNewYorkStart
+  felix_current_behaviour: >
+    FelixScalper filters by session (Asian off, London and New York on) but has
+    no concept of a specific hour carrying an edge, and never takes a trade
+    purely because of the clock.
+  notes: >
+    A fixed-clock-time edge is exactly the kind of claim that is cheap to test
+    and prone to being an artefact of one week's data. Our journal records
+    signal_time, so hour-of-day is already available for grouping.
+
+- id: ho-3-oclock-jiggle
+  category: mean_reversion
+  claim: >
+    The same reversal tendency appears around 3pm New York, driven by the US
+    bond market close.
+  source:
+    book: "Scalp Trading Methods from the Pit"
+    author: "Kevin Ho"
+    year: 2003
+    page: "36"
+    publication: "chartpoint"
+  rationale: >
+    A scheduled market close in a correlated instrument forces repositioning.
+  conditions:
+    - "Direction taken against the move in the 30 minutes prior to 3pm"
+    - "Orders cancelled after 3:30"
+  assumptions:
+    - "Bond market close influences equity index futures"
+  invalidated_by:
+    - "No measurable turn at that hour"
+  mechanics:
+    - "time-of-day filter"
+    - "cross-market cause"
+  evidence_quality: anecdote
+  author_claimed_result: "Reported alongside the 10 o'clock pattern; all winners that week."
+  stance: unrelated
+  felix_inputs:
+    - InpSessionFilter
+  felix_current_behaviour: "No hour-specific logic exists."
+  notes: >
+    Interesting mainly as a stated *mechanism* -- a scheduled event in a
+    correlated instrument. That generalises to forex far better than the
+    specific hour does.
+
+- id: ho-engulfment-penny-pincher
+  category: candlestick_patterns
+  claim: >
+    Buy at market when a white body exceeds the high of the previous dark body
+    (and the mirror for sells), but only within the first and last hour of the
+    trading day, exiting for a fixed small profit or after 30 seconds.
+  source:
+    book: "Scalp Trading Methods from the Pit"
+    author: "Kevin Ho"
+    year: 2003
+    page: "36"
+    publication: "chartpoint"
+  rationale: >
+    An engulfing bar signals a short-term shift in control; restricting it to
+    the highest-volume hours raises the chance the move follows through.
+  conditions:
+    - "Only within the first and last hour of the trading day"
+    - "Exit after 30 seconds if the target is not reached"
+  assumptions:
+    - "The first and last hour carry the day's heaviest participation"
+  invalidated_by:
+    - "Engulfing bars outside those hours performing the same"
+  mechanics:
+    - "bullish engulfing"
+    - "bearish engulfing"
+    - "time-of-day filter"
+  evidence_quality: anecdote
+  author_claimed_result: "14 out of 15 successful trades in the sample week."
+  stance: extends
+  felix_inputs:
+    - InpWeightCandle
+    - InpSessionFilter
+  felix_current_behaviour: >
+    FelixScalper already detects bullish and bearish engulfing and scores them
+    (candle component, weight 5 of 100) with a pattern quality figure, but
+    applies no time-of-day condition to them.
+  notes: >
+    This is the most directly testable claim in the article against data we
+    already hold. The journal records `pattern` and `session` for every signal,
+    so whether engulfing signals perform differently by session can be measured
+    on the existing 525 rows without changing anything. Note the existing
+    factor screen already found `pattern` non-significant overall
+    (Cramer's V 0.075, p_raw 0.882) -- but that test pooled all sessions, which
+    is precisely the interaction this claim proposes.
+
+- id: ho-5-minute-standard-deviation-scalp
+  category: mean_reversion
+  claim: >
+    On a 5-minute chart with a 10-bar moving average and bands at one standard
+    deviation, buy dips that penetrate the lower band while the bands still
+    slope up, and sell rallies through the upper band while they slope down.
+  source:
+    book: "Scalp Trading Methods from the Pit"
+    author: "Kevin Ho"
+    year: 2003
+    page: "37"
+    publication: "chartpoint"
+  rationale: >
+    Entering a trend only on meaningful retracements gives a better price than
+    chasing, while the band slope keeps the trade with the prevailing direction.
+  conditions:
+    - "Band slope must confirm the trend direction"
+    - "Exit if the slope changes after entry"
+    - "Target the opposite band or a fixed gain, whichever comes first"
+  assumptions:
+    - "Trends retrace to one standard deviation before continuing"
+    - "5-minute bars"
+  invalidated_by:
+    - "Band slope reversing after entry"
+    - "Retracements routinely running past one standard deviation"
+  mechanics:
+    - "10-period moving average"
+    - "1 standard deviation bands"
+    - "pullback entry"
+    - "trend filter by band slope"
+  evidence_quality: anecdote
+  author_claimed_result: "10 of 14 trades profitable over 3 trading days."
+  conflicts_with:
+    - ho-15-minute-opening-range-scalp
+  stance: contradicts
+  felix_inputs:
+    - InpBreakoutRetestMode
+    - InpRetestLookback
+    - InpEmaFast
+  felix_current_behaviour: >
+    FelixScalper enters on breakout confirmation rather than on retracement,
+    and InpBreakoutRetestMode is currently false. It uses EMAs (20/50/200), not
+    a 10-bar SMA with standard deviation bands, and has no Bollinger-style
+    band at all.
+  notes: >
+    This is the article's own internal contradiction and the most useful thing
+    in it. Pattern 1 says enter on the break; Pattern 5 says wait for the
+    pullback. The same author recommends both, for different conditions, and is
+    explicit that Pattern 5 is for trend continuation "AFTER the trend has gone
+    underway". The disagreement is therefore conditional, not absolute -- which
+    is exactly what a hypothesis should capture.
+
+- id: raschke-the-anti
+  category: momentum
+  claim: >
+    On 5-minute bars, using a 7-period slow stochastic with a 10-period moving
+    average of it as a trend filter, buy when the stochastic crosses above its
+    own upward-sloping average and sell when it crosses below its own
+    downward-sloping average.
+  source:
+    book: "Scalp Trading Methods from the Pit"
+    author: "Kevin Ho"
+    year: 2003
+    page: "37"
+    publication: "chartpoint"
+  rationale: >
+    A momentum oscillator crossing its own smoothed version marks the
+    resumption of the prevailing move after a pause.
+  conditions:
+    - "The stochastic's own moving average must slope in the trade direction"
+    - "Signals taken on the close of a 5-minute bar"
+    - "Exit if the trade goes nowhere after 3 minutes"
+  assumptions:
+    - "The oscillator's slope is a usable trend filter on its own"
+  invalidated_by:
+    - "Crossovers with a flat filter line performing the same as sloped ones"
+  mechanics:
+    - "7-period slow stochastic"
+    - "10-period moving average of the oscillator"
+    - "oscillator crossover"
+    - "time-based exit"
+  evidence_quality: anecdote
+  author_claimed_result: "5 winning trades in 3 trading days."
+  stance: extends
+  felix_inputs:
+    - InpWeightMomentum
+    - InpRsiPeriod
+  felix_current_behaviour: >
+    FelixScalper scores momentum from RSI(14) and MACD(12,26,9), weight 15 of
+    100. It does not compute a stochastic at all -- iStochastic appears zero
+    times in the indicator -- and it does not use the slope of an oscillator's
+    own average as a filter.
+  notes: >
+    Credited by Kevin Ho to Linda Bradford Raschke, and the only pattern in the
+    article that is hers. The transferable idea is not "add a stochastic" but
+    "filter a momentum signal by the slope of its own smoothing", which could
+    be applied to the RSI and MACD already present without adding an indicator.

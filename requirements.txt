@@ -1,0 +1,8 @@
+# Runtime
+PyYAML>=6.0,<7.0
+
+# Extraction (reading the source PDFs)
+pypdf>=6.0,<7.0
+
+# Development
+pytest>=8.0
